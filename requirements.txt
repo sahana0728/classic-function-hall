@@ -1,0 +1,304 @@
+Function hall management App: 
+       Platform Availability 
+• Mobile App (Android/iOS) – simple, intuitive design 
+• Admin Dashboard (Optional Web Version) – for deeper insights 
+             Interactive Booking Calendar 
+• Instantly view availability for any date 
+• Color-coded status: Available, Enquiry, Booked 
+• Tap on a date to check existing bookings or add new ones 
+   Quick Enquiry Capture 
+• Record client name, number, and notes 
+• Store interested leads without committing to bookings 
+• Easily convert to bookings when confirmed 
+     Easy Event Booking with Payment Tracking 
+• Capture total event amount and advance payment 
+• Auto-calculate remaining balance 
+• Maintain full payment history and due reminders 
+   Theme Selection with Visual Reference 
+• Choose from a gallery of pre-loaded decoration themes 
+• Attach reference pictures for easy execution 
+     Temporary Customer Profiles 
+• Quickly save customer data during enquiries or bookings 
+• Profiles get auto-cleared when not needed 
+       Client Booking Profile 
+• View full details of the event 
+• Track payments, theme, notes, and personal information 
+     Role-Based Access (Admin + Team Users) 
+• Manage staff with different levels of access 
+• Only admins can add/edit users and view sensitive data 
+ 
+ 
+Details page by page: 
+  1. Splash Screen 
+Purpose: Branding and initial loading. 
+• Shows app logo 
+• Lasts for ~2 seconds 
+• Navigates automatically to Login screen 
+ 
+     2. Login / Authentication Page 
+Purpose: Authenticate users before accessing the system. 
+Fields: 
+• Phone number or Email 
+• OTP input or Password field 
+• "Login" button 
+Features: 
+• Validation for input 
+• OTP verification or password check 
+• Success → Navigate to Calendar/Home 
+• Failure → Show error message 
+ 
+        3. Home (Calendar View) 
+Purpose: Central dashboard showing availability/bookings by date. 
+Components: 
+• Monthly calendar view (date-wise) 
+o Green: Available 
+o Yellow: Enquiry 
+o Red: Booked 
+• Navigation arrows for month switching 
+• Tap on any date to access the Date Detail Modal 
+ 
+                 4. Date Detail Modal 
+Purpose: Manage what happens on a specific date. 
+Based on status of the date: 
+   If Available: 
+• Button:   Create Booking 
+• Button:   Add Enquiry 
+  If Enquiry exists: 
+• List of enquiries for that date 
+• Tap to view Enquiry Details 
+• Option to convert enquiry to booking 
+  If Booked: 
+• Show summary of booking 
+• Tap to view full Booking Details 
+• From there → tap on profile → view payment & decor info 
+ 
+   5. Create Enquiry Page 
+Purpose: Quickly log interest for a specific date. 
+Fields: 
+• Name 
+• Phone number 
+• Notes 
+• Auto-filled Date from calendar 
+Actions: 
+• Submit → Saves to database 
+• Updates calendar to show that date as “Enquiry” 
+ 
+         6. Enquiry Details Page 
+Purpose: View and convert an enquiry. 
+Components: 
+• Name 
+• Phone number 
+• Notes 
+• Created date 
+• Button:    Convert to Booking → Opens booking page with pre-filled data 
+ 
+          7. Create Booking Page 
+Purpose: Finalize event details and take advance. 
+Fields: 
+• Customer Name 
+• Phone Number 
+• Notes 
+• Event Date (pre-filled) 
+• Total Package Amount (number) 
+• Advance Paid (number) 
+• Balance (auto-calculated) 
+• Select Decoration Theme (from list) 
+Actions: 
+• Submit → Save booking 
+• Calendar gets updated to "Booked" 
+• A temp customer profile is created 
+ 
+       8. Booking Details Page 
+Purpose: Complete view of booking info. 
+Sections: 
+• Customer Info 
+• Booking Date 
+• Total Package Amount 
+• Advance Paid 
+• Balance Left 
+• Booking Notes 
+• Status: (Paid / Pending / Cancelled) 
+Buttons: 
+•       View/Add Payment Details 
+•    View Selected Decoration Theme 
+•       Edit Booking 
+•     Cancel Booking 
+ 
+      9. Payment Management Page 
+Purpose: Track and add payments linked to a booking. 
+Fields: 
+• Payment Date 
+• Amount Paid 
+• Mode (Cash, UPI, Bank Transfer, etc.) 
+• Notes 
+Actions: 
+• Add payment 
+• Edit previous payments 
+• Mark booking as fully paid 
+ 
+   10. Decoration Theme Gallery 
+Purpose: Choose a decoration style for a event. 
+Components: 
+• Grid/List of theme cards 
+o Theme Name 
+o Reference Image(s) 
+o Description 
+• Selection button 
+Actions: 
+• Attach selected theme to booking 
+ 
+     11. Temp Customer Profile 
+Purpose: Temporary store for customer data during booking. 
+Fields: 
+• Name 
+• Phone Number 
+• Notes 
+     Note: 
+• Created during enquiry or booking 
+• Cleared if booking is not completed in X mins (or manually) 
+ 
+    12. Settings / User Profile 
+Purpose: User account settings 
+Components: 
+• View/Edit personal info 
+• Role: (Read-only unless admin) 
+• Logout Button 
+• Theme / App settings (optional) 
+ 
+                        13. Admin – User Management Module 
+Visible only for Admin users 
+ 
+    Users List Page 
+Purpose: View/manage all registered users 
+Components: 
+• Table: Name, Phone/Email, Role, Status (Active/Inactive) 
+• Filters: Role-based filtering 
+• Search bar 
+• Button:   Add New User 
+ 
+  Add/Edit User Page 
+Purpose: Onboard or update users 
+Fields: 
+• Name 
+• Phone number or Email 
+• Role (Dropdown: Admin / Manager / Staff / Decorator) 
+• Password or OTP method 
+• Status: Active / Inactive 
+Actions: 
+• Submit → Save user 
+• Send credentials or OTP to user 
+ 
+    Navigation Flow Summary 
+Splash → Login → Calendar (Home) 
+         ↓ 
+       Tap Date 
+        ↓ 
+  Enquiry / Booking / Details 
+        ↓ 
+   View or Create Profiles, Decor, Payments 
+        ↓ 
+    Admin Only → User Management 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Wireframe Flow Diagram 
+  Splash Screen 
+      ↓ 
+     Login / Authentication 
+      ↓ 
+        Home (Calendar View) 
+      ↓ 
+                 Tap on a Date 
+      ↓ 
+ ┌──────────────────────────────────── 
+ │                             Date Status Options                      │ 
+ │                                                            │ 
+ │  ┌────────────┬─────────────┬───────                
+│ 
+ │  │ Available  │  Enquiry    │  Booked    │                 │ 
+ │  └────────────┴─────────────┴───────                 
+│ 
+ │                                                            │ 
+ │  Available →   Create Booking                              │ 
+ │            →   Add Enquiry                                 │ 
+ │                                                            │ 
+ │  Enquiry → View Enquiries                                  │ 
+ │           → Tap Enquiry → Enquiry Details                  │ 
+ │                         → Convert to Booking               │ 
+ │                                                            │ 
+ │  Booked → View Booking                                     │ 
+ │          → Tap Customer Profile                            │ 
+ │               ├──       Payment Details                       │ 
+ │               └──    Decoration Theme (Images)             │ 
+ └──────────────────────────────────── 
+  
+    Back to Calendar 
+ 
+───────────── 
+     Create Booking Page 
+    ├─ Temp Customer Info (name, phone, notes) 
+    ├─ Date Selection (pre-filled from calendar) 
+    ├─ Total Package & Advance Payment 
+    ├─ Decoration Theme Picker (with preview images) 
+    └─ Submit → Save → Return to Calendar (Date marked Booked) 
+ 
+     Create Enquiry Page 
+    ├─ Name, Phone, Notes 
+    └─ Submit → Save → Return to Calendar (Date marked Enquiry) 
+ 
+     Booking Details Page 
+    ├─ Customer Info 
+    ├─ Event Date 
+    ├─ Total Amount, Advance, Balance 
+    ├─      Payment History (Add/Edit Payment) 
+    ├─    Selected Decoration Images 
+    └─ Option to Cancel or Edit Booking 
+ 
+     Enquiry Details Page 
+    ├─ Customer Name, Phone, Notes 
+    └─    Convert to Booking → Opens Create Booking with prefilled data 
+ 
+   Decoration Themes Gallery 
+    └─ Preview themes with images → Select during booking 
+ 
+      Payment Management 
+    ├─ View/Add/Edit payment records per booking 
+    └─ Auto-update balance and payment status 
+ 
+     Temp Customer Profile (Auto-created) 
+    ├─ Name, Phone, Notes 
+    └─ Cleared if booking is not confirmed in time 
+ 
+    Settings / Profile Page 
+    ├─ Edit profile 
+    └─ Logout / Switch User 
+ 
+──────────────────────────────────────────── 
+    Admin Section (Visible only to Admin Role) 
+ 
+                        User Management 
+    ├─ Users List 
+    │    ├─ Name, Role, Status (Active/Inactive) 
+    │    └─ Search/Filter Users 
+    ├─ Add New User 
+    │    ├─ Name, Phone/Email 
+    │    ├─ Role: Admin / Manager / Staff / Decorator 
+    │    └─ Temporary password or OTP 
+    └─ Edit User 
+         ├─ Change role or status 
+         └─ Reset password / Deactivate 
+ 
+ 
+ 
+ 
+ 

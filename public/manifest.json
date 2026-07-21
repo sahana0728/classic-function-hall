@@ -1,0 +1,30 @@
+{
+  "short_name": "Classic Hall",
+  "name": "Classic Function Hall",
+  "description": "Manage hall availability, bookings, and enquiries",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/login",
+  "background_color": "#1e293b",
+  "theme_color": "#1e293b",
+  "display": "standalone",
+  "orientation": "portrait"
+}
