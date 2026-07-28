@@ -322,7 +322,7 @@ export default function Portfolio() {
                         <div className="flex flex-col sm:flex-row gap-8 justify-center mt-16 text-slate-400">
                             <div className="flex items-center gap-3">
                                 <Phone className="w-5 h-5 text-slate-500" />
-                                <span className="font-medium">+91 94484 41633</span>
+                                <span className="font-medium">+91 72043 34448</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Mail className="w-5 h-5 text-slate-500" />
