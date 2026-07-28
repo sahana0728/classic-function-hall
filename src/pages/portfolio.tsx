@@ -208,7 +208,7 @@ export default function Portfolio() {
 
             {/* ===== THEME GALLERY LIGHTBOX ===== */}
             <Dialog open={!!selectedTheme} onOpenChange={open => { if (!open) setSelectedTheme(null); }}>
-                <DialogContent className="sm:max-w-5xl rounded-3xl border-0 shadow-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
+                <DialogContent className="w-[calc(100%-2rem)] sm:max-w-5xl rounded-3xl border-0 shadow-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
                     <div className="h-2 bg-gradient-to-r from-slate-700 via-slate-500 to-slate-700" />
                     <div className="p-6 md:p-8 flex-1 overflow-y-auto">
                         {selectedTheme && (
@@ -372,7 +372,7 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md rounded-3xl border-0 shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md rounded-3xl border-0 shadow-2xl p-0 overflow-hidden">
                 {/* Top accent */}
                 <div className="h-2 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700" />
 
