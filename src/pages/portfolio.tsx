@@ -372,11 +372,11 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md rounded-3xl border-0 shadow-2xl p-0 overflow-hidden">
+            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md rounded-3xl border-0 shadow-2xl p-0 max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Top accent */}
-                <div className="h-2 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700" />
+                <div className="h-2 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 flex-shrink-0" />
 
-                <div className="p-6 md:p-8">
+                <div className="p-6 md:p-8 overflow-y-auto flex-1">
                     {submitted ? (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
