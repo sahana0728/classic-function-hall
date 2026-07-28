@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tent, Loader2, Download, Smartphone, X } from "lucide-react";
+import { Loader2, Download, Smartphone, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Login() {
@@ -112,8 +112,8 @@ export default function Login() {
         {/* ── Login Card ── */}
         <div className="glass-panel rounded-3xl p-8 md:p-10 text-center">
           <div className="flex justify-center mb-6">
-            <div className="bg-primary p-4 rounded-2xl shadow-xl shadow-primary/20">
-              <Tent className="w-10 h-10 text-primary-foreground" />
+            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0 shadow-xl">
+              <img src="/favicon.png" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
           </div>
           

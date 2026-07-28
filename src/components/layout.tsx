@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/api";
-import { LogOut, CalendarDays, Bookmark, Palette, Tent, Smartphone, X, MessageSquare, MoreHorizontal, Shield, Download, Bell, ChevronRight, Calendar } from "lucide-react";
+import { LogOut, CalendarDays, Bookmark, Palette, Smartphone, X, MessageSquare, MoreHorizontal, Shield, Download, Bell, ChevronRight, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 
@@ -111,8 +111,8 @@ export function Layout({ children }: { children: ReactNode }) {
         {/* ── Top Header Bar ── */}
         <header className="safe-top bg-card border-b border-border px-4 py-3 flex items-center justify-between z-30 shadow-sm">
           <div className="flex items-center gap-2.5">
-            <div className="bg-primary/10 p-1.5 rounded-lg">
-              <Tent className="w-5 h-5 text-primary" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
+              <img src="/favicon.png" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
             <div>
               <h1 className="font-display font-bold text-base leading-none text-primary">Classic</h1>
@@ -408,8 +408,8 @@ export function Layout({ children }: { children: ReactNode }) {
         className="w-64 bg-card border-r border-border shadow-sm flex flex-col z-20 relative"
       >
         <div className="p-6 border-b border-border/50 flex items-center gap-3 text-primary">
-          <div className="bg-primary/10 p-2 rounded-xl">
-            <Tent className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
+            <img src="/favicon.png" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
           </div>
           <div>
             <h1 className="font-display font-bold text-xl leading-none">Classic</h1>
