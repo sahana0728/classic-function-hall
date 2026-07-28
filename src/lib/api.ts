@@ -15,11 +15,9 @@ export const BASE_URL = (() => {
     if (isLocal) {
       return `http://${hostname}:5001`;
     }
+    return window.location.origin;
   }
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL.replace('/api', '');
-  }
-  return 'http://localhost:5001';
+  return '';
 })();
 
 export async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
