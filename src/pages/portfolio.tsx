@@ -397,11 +397,21 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
                         </motion.div>
                     ) : (
                         <>
-                            <DialogHeader className="mb-5">
-                                <DialogTitle className="text-2xl font-bold text-slate-800">Send us an Enquiry</DialogTitle>
-                                <p className="text-gray-500 text-sm mt-1">Fill in your details and we'll get back to you shortly</p>
-                            </DialogHeader>
-
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <DialogTitle className="text-xl font-bold text-slate-800">Send us an Enquiry</DialogTitle>
+                                    <p className="text-gray-500 text-xs mt-1">Fill in your details and we'll get back to you shortly</p>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onClick={() => onOpenChange(false)}
+                                    className="p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                                    aria-label="Close dialog"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+ 
                             <form onSubmit={(e) => { 
                                  e.preventDefault(); 
                                  if (form.startDate && form.endDate && new Date(form.endDate) < new Date(form.startDate)) {
@@ -409,55 +419,69 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
                                      return;
                                  }
                                  submit.mutate(); 
-                             }} className="space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="pub-name" className="text-xs font-semibold uppercase tracking-wider text-gray-500">Full Name *</Label>
+                             }} className="space-y-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="pub-name" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Full Name *</Label>
                                         <Input
                                             id="pub-name" required placeholder="John Doe"
                                             value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                                            className="h-11 rounded-xl bg-gray-50 border-gray-200"
+                                            className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="pub-phone" className="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone *</Label>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="pub-phone" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Phone *</Label>
                                         <Input
-                                            id="pub-phone" required placeholder="+91 98765 43210"
+                                            id="pub-phone" required placeholder="+91 72043 34448"
                                             value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                                            className="h-11 rounded-xl bg-gray-50 border-gray-200"
+                                            className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="pub-start" className="text-xs font-semibold uppercase tracking-wider text-gray-500">Preferred Start Date</Label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="pub-start" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Preferred Start Date</Label>
                                         <Input
                                             id="pub-start" type="date"
                                             value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })}
-                                            className="h-11 rounded-xl bg-gray-50 border-gray-200"
+                                            className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="pub-end" className="text-xs font-semibold uppercase tracking-wider text-gray-500">Preferred End Date</Label>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="pub-end" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Preferred End Date</Label>
                                         <Input
                                             id="pub-end" type="date"
                                             value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })}
-                                            className="h-11 rounded-xl bg-gray-50 border-gray-200"
+                                            className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="pub-notes" className="text-xs font-semibold uppercase tracking-wider text-gray-500">What are you looking for?</Label>
+                                <div className="space-y-1">
+                                    <Label htmlFor="pub-notes" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">What are you looking for?</Label>
                                     <Textarea
-                                        id="pub-notes" placeholder="Tell us about your event, expected guests, any special requirements..."
+                                        id="pub-notes" placeholder="Tell us about your event, expected guests, etc."
                                         value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                                        className="resize-none h-24 rounded-xl bg-gray-50 border-gray-200"
+                                        className="resize-none h-18 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                     />
                                 </div>
-                                <Button type="submit" disabled={submit.isPending} className="w-full h-12 text-base font-semibold rounded-xl shadow-lg mt-2">
-                                    {submit.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Send className="w-5 h-5 mr-2" />}
-                                    Submit Enquiry
-                                </Button>
+                                <div className="flex gap-3 pt-2">
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        onClick={() => onOpenChange(false)} 
+                                        className="flex-1 h-11 rounded-xl text-sm border-gray-200 hover:bg-gray-50"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button 
+                                        type="submit" 
+                                        disabled={submit.isPending} 
+                                        className="flex-1 h-11 text-sm font-semibold rounded-xl shadow-md"
+                                    >
+                                        {submit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Send className="w-4 h-4 mr-1.5" />}
+                                        Submit
+                                    </Button>
+                                </div>
                             </form>
                         </>
                     )}
