@@ -245,7 +245,7 @@ router.delete('/themes/:id', authenticate, async (req, res) => {
         await db.query('UPDATE bookings SET "themeId" = NULL WHERE "themeId" = $1', [themeId]);
         await db.query('DELETE FROM themes WHERE id = $1', [themeId]);
         
-        await createAuditLog('DELETE_THEME', id, 'theme', req.user.email, { themeId });
+        await createAuditLog('DELETE_THEME', themeId.toString(), 'theme', req.user.email, { themeId });
         res.json({ message: 'Theme deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
