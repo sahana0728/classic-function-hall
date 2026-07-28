@@ -113,7 +113,7 @@ export default function Login() {
         <div className="glass-panel rounded-3xl p-8 md:p-10 text-center">
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 rounded-2xl overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0 shadow-xl">
-              <img src="/favicon.png" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
+              <img src="/favicon.png?v=1.0.1" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
           </div>
           
