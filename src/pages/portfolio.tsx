@@ -322,15 +322,15 @@ export default function Portfolio() {
                         <div className="flex flex-col sm:flex-row gap-8 justify-center mt-16 text-slate-400">
                             <div className="flex items-center gap-3">
                                 <Phone className="w-5 h-5 text-slate-500" />
-                                <span className="font-medium">+91 98765 43210</span>
+                                <span className="font-medium">+91 94484 41633</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Mail className="w-5 h-5 text-slate-500" />
-                                <span className="font-medium">info@classichall.com</span>
+                                <span className="font-medium">classicfunctionhallbly@gmail.com</span>
                             </div>
                             <div className="flex items-center gap-3">
                                 <MapPin className="w-5 h-5 text-slate-500" />
-                                <span className="font-medium">Bangalore, India</span>
+                                <span className="font-medium">Classic A/C Function Hall, 5WG7+4CQ, Ballari, Karnataka 583103</span>
                             </div>
                         </div>
                     </motion.div>
