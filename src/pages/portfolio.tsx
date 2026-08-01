@@ -443,7 +443,15 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
                                         <Label htmlFor="pub-start" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Preferred Start Date</Label>
                                         <Input
                                             id="pub-start" type="date"
-                                            value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })}
+                                            value={form.startDate} 
+                                            onChange={e => {
+                                                const newStart = e.target.value;
+                                                let newEnd = form.endDate;
+                                                if (newEnd && newStart && new Date(newEnd) < new Date(newStart)) {
+                                                    newEnd = newStart;
+                                                }
+                                                setForm({ ...form, startDate: newStart, endDate: newEnd });
+                                            }}
                                             className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />
                                     </div>
@@ -451,6 +459,7 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
                                         <Label htmlFor="pub-end" className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Preferred End Date</Label>
                                         <Input
                                             id="pub-end" type="date"
+                                            min={form.startDate}
                                             value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })}
                                             className="h-10 rounded-xl bg-gray-50 border-gray-200 text-sm"
                                         />

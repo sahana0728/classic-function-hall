@@ -186,7 +186,14 @@ export default function BookingCreate() {
                   type="date"
                   required
                   value={formData.startDate}
-                  onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                  onChange={e => {
+                    const newStart = e.target.value;
+                    let newEnd = formData.endDate;
+                    if (newEnd && newStart && new Date(newEnd) < new Date(newStart)) {
+                      newEnd = newStart;
+                    }
+                    setFormData({ ...formData, startDate: newStart, endDate: newEnd });
+                  }}
                   className="h-12 bg-muted/30"
                 />
               </div>
@@ -196,6 +203,7 @@ export default function BookingCreate() {
                   id="endDate"
                   type="date"
                   required
+                  min={formData.startDate}
                   value={formData.endDate}
                   onChange={e => setFormData({ ...formData, endDate: e.target.value })}
                   className="h-12 bg-muted/30"
