@@ -19,6 +19,7 @@ export default function Login() {
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [showAndroidInstructions, setShowAndroidInstructions] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
@@ -31,9 +32,10 @@ export default function Login() {
 
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isAppleMobile = /iphone|ipad|ipod/.test(userAgent);
+    const isMobileDevice = /android|iphone|ipad|ipod|windows phone/i.test(userAgent);
     setIsIOS(isAppleMobile);
 
-    if (isAppleMobile) {
+    if (isMobileDevice) {
       setShowInstallBanner(true);
     }
 
@@ -56,6 +58,8 @@ export default function Login() {
         if (choiceResult.outcome === "accepted") setShowInstallBanner(false);
         setDeferredPrompt(null);
       });
+    } else {
+      setShowAndroidInstructions(true);
     }
   };
 
@@ -202,6 +206,52 @@ export default function Login() {
                 </div>
                 <button
                   onClick={() => setShowIOSInstructions(false)}
+                  className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:bg-primary/95 transition-colors"
+                >
+                  Got it
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        {/* Android Instructions Modal */}
+        {showAndroidInstructions && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-card w-full max-w-sm rounded-3xl p-6 shadow-2xl relative border border-border"
+            >
+              <button
+                onClick={() => setShowAndroidInstructions(false)}
+                className="absolute top-4 right-4 p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <Smartphone className="w-6 h-6" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-foreground">Install on Android</h3>
+                <p className="text-sm text-muted-foreground">
+                  Follow these simple steps:
+                </p>
+                <div className="text-left space-y-3 bg-muted/40 p-4 rounded-xl text-sm border border-border/50 text-foreground">
+                  <div className="flex gap-3">
+                    <span className="font-bold text-primary">1.</span>
+                    <span>Tap the <strong>three-dot menu (⋮)</strong> in the top-right corner of Chrome.</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="font-bold text-primary">2.</span>
+                    <span>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="font-bold text-primary">3.</span>
+                    <span>Confirm by tapping <strong>"Add"</strong> or <strong>"Install"</strong>.</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAndroidInstructions(false)}
                   className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:bg-primary/95 transition-colors"
                 >
                   Got it
