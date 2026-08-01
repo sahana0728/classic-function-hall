@@ -466,6 +466,53 @@ router.post('/bookings/:id/payments', authenticate, async (req, res) => {
     }
 });
 
+// Update general booking details
+router.put('/bookings/:id', authenticate, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { customerName, phone, startDate, endDate, totalAmount, notes, status } = req.body;
+
+        if (!startDate || !endDate) {
+            return res.status(400).json({ error: 'Start date and end date are required' });
+        }
+
+        if (new Date(endDate) < new Date(startDate)) {
+            return res.status(400).json({ error: 'End date cannot be before start date.' });
+        }
+
+        // Check if there's any overlaps, excluding current booking
+        const overlaps = await checkAvailability(startDate, endDate, id);
+        if (overlaps.length > 0 && status !== 'Cancelled') {
+            return res.status(409).json({ 
+                error: 'The selected dates overlap with an existing booking.',
+                conflicts: overlaps 
+            });
+        }
+
+        // Fetch current booking to validate advancePaid vs new totalAmount
+        const currentBookingQuery = await db.query('SELECT "advancePaid" FROM bookings WHERE id = $1', [id]);
+        if (currentBookingQuery.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+        const currentBooking = currentBookingQuery.rows[0];
+        if (Number(totalAmount) < Number(currentBooking.advancePaid)) {
+            return res.status(400).json({ error: `Total amount cannot be less than the already paid amount of ₹${currentBooking.advancePaid.toLocaleString()}` });
+        }
+
+        await db.query(`
+            UPDATE bookings 
+            SET "customerName" = $1, phone = $2, "startDate" = $3, "endDate" = $4, "totalAmount" = $5, notes = $6, status = $7
+            WHERE id = $8
+        `, [customerName, phone, startDate, endDate, totalAmount, notes, status || 'Booked', id]);
+
+        await createAuditLog('UPDATE_BOOKING', id, 'booking', req.user.email, { customerName, startDate, endDate, totalAmount, status });
+
+        res.json({ message: 'Booking updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Update booking notes only
 router.patch('/bookings/:id/notes', authenticate, async (req, res) => {
     try {

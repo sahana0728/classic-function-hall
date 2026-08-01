@@ -100,6 +100,44 @@ export default function BookingDetails() {
     }
   });
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    customerName: "",
+    phone: "",
+    startDate: "",
+    endDate: "",
+    totalAmount: "",
+    notes: "",
+    status: ""
+  });
+
+  const updateBooking = useMutation({
+    mutationFn: async (data: typeof editForm) => {
+      const res = await fetchWithAuth(`/api/bookings/${bookingId}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ...data,
+          totalAmount: Number(data.totalAmount)
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to update booking");
+      }
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.bookings.get.path, bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['auditLogs', 'booking', bookingId] });
+      queryClient.invalidateQueries({ queryKey: [api.calendar.list.path] });
+      toast({ title: "Booking updated successfully" });
+      setEditDialogOpen(false);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to update booking", description: err.message, variant: "destructive" });
+    }
+  });
+
   const addPayment = useMutation({
     mutationFn: async (amount: number) => {
       const res = await fetchWithAuth(`/api/bookings/${bookingId}/payments`, {
@@ -202,7 +240,31 @@ export default function BookingDetails() {
       {/* Customer + Event Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6 shadow-md border-border/50 space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Customer Information</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Customer Information</h3>
+            {!isClosed && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 hover:bg-muted" 
+                onClick={() => {
+                  setEditForm({
+                    customerName: booking.customerName,
+                    phone: booking.phone,
+                    startDate: booking.startDate ? booking.startDate.split('T')[0] : "",
+                    endDate: booking.endDate ? booking.endDate.split('T')[0] : "",
+                    totalAmount: booking.totalAmount.toString(),
+                    notes: booking.notes || "",
+                    status: booking.status
+                  });
+                  setEditDialogOpen(true);
+                }}
+                title="Edit booking details"
+              >
+                <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+              </Button>
+            )}
+          </div>
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Name:</span>
@@ -501,6 +563,138 @@ export default function BookingDetails() {
           setUploadOpen(false);
         }}
       />
+
+      {/* Edit Booking Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md rounded-3xl border-0 shadow-2xl p-0 overflow-hidden">
+          <div className="h-2 bg-gradient-to-r from-primary to-primary/80 flex-shrink-0" />
+          <div className="p-6 md:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-foreground">Edit Booking Details</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (editForm.startDate && editForm.endDate && new Date(editForm.endDate) < new Date(editForm.startDate)) {
+                toast({ title: "Invalid Dates", description: "End Date cannot be before Start Date.", variant: "destructive" });
+                return;
+              }
+              updateBooking.mutate(editForm);
+            }} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-name">Customer Name *</Label>
+                <Input
+                  id="edit-name"
+                  required
+                  value={editForm.customerName}
+                  onChange={e => setEditForm({ ...editForm, customerName: e.target.value })}
+                  className="h-11 rounded-xl bg-muted/20 border-border"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-phone">Phone *</Label>
+                <Input
+                  id="edit-phone"
+                  required
+                  value={editForm.phone}
+                  onChange={e => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="h-11 rounded-xl bg-muted/20 border-border"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-start">Start Date *</Label>
+                  <Input
+                    id="edit-start"
+                    type="date"
+                    required
+                    value={editForm.startDate}
+                    onChange={e => {
+                      const newStart = e.target.value;
+                      let newEnd = editForm.endDate;
+                      if (newEnd && newStart && new Date(newEnd) < new Date(newStart)) {
+                        newEnd = newStart;
+                      }
+                      setEditForm({ ...editForm, startDate: newStart, endDate: newEnd });
+                    }}
+                    className="h-11 rounded-xl bg-muted/20 border-border"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-end">End Date *</Label>
+                  <Input
+                    id="edit-end"
+                    type="date"
+                    required
+                    min={editForm.startDate}
+                    value={editForm.endDate}
+                    onChange={e => setEditForm({ ...editForm, endDate: e.target.value })}
+                    className="h-11 rounded-xl bg-muted/20 border-border"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-amount">Total Amount (₹) *</Label>
+                  <Input
+                    id="edit-amount"
+                    type="number"
+                    required
+                    min="0"
+                    value={editForm.totalAmount}
+                    onChange={e => setEditForm({ ...editForm, totalAmount: e.target.value })}
+                    className="h-11 rounded-xl bg-muted/20 border-border"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-status">Status *</Label>
+                  <select
+                    id="edit-status"
+                    value={editForm.status}
+                    onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                    className="flex h-11 w-full rounded-xl border border-input bg-card px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
+                  >
+                    <option value="Booked">Booked</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-notes">Booking Notes</Label>
+                <Textarea
+                  id="edit-notes"
+                  value={editForm.notes}
+                  onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
+                  className="resize-none h-20 rounded-xl bg-muted/20 border-border"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                  className="flex-1 h-12 rounded-xl text-sm"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateBooking.isPending}
+                  className="flex-1 h-12 text-sm font-semibold rounded-xl shadow-md"
+                >
+                  {updateBooking.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-1.5" /> : <Save className="w-5 h-5 mr-1.5" />}
+                  Save
+                </Button>
+              </div>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
