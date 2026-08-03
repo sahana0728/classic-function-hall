@@ -135,6 +135,7 @@ export const api = {
           title: z.string(),
           startDate: z.string(),
           endDate: z.string(),
+          blockedStartDate: z.string().optional(),
           type: z.enum(['booked', 'enquiry'])
         }))
       }
