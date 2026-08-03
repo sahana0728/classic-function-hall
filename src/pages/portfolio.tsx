@@ -414,6 +414,12 @@ function EnquiryDialog({ open, onOpenChange, submitted, setSubmitted }: {
  
                             <form onSubmit={(e) => { 
                                  e.preventDefault(); 
+                                 const cleanPhone = form.phone.replace(/[\s\-()]/g, "");
+                                 const phoneRegex = /^(?:\+?91|0)?[6-9]\d{9}$/;
+                                 if (!phoneRegex.test(cleanPhone)) {
+                                     alert("Please enter a valid 10-digit mobile number.");
+                                     return;
+                                 }
                                  if (form.startDate && form.endDate && new Date(form.endDate) < new Date(form.startDate)) {
                                      alert("End Date cannot be before Start Date.");
                                      return;

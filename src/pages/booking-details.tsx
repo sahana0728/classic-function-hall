@@ -575,6 +575,12 @@ export default function BookingDetails() {
 
             <form onSubmit={(e) => {
               e.preventDefault();
+              const cleanPhone = editForm.phone.replace(/[\s\-()]/g, "");
+              const phoneRegex = /^(?:\+?91|0)?[6-9]\d{9}$/;
+              if (!phoneRegex.test(cleanPhone)) {
+                toast({ title: "Invalid Phone Number", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+                return;
+              }
               if (editForm.startDate && editForm.endDate && new Date(editForm.endDate) < new Date(editForm.startDate)) {
                 toast({ title: "Invalid Dates", description: "End Date cannot be before Start Date.", variant: "destructive" });
                 return;

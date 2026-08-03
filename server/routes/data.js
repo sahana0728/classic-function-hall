@@ -71,6 +71,13 @@ const checkAvailability = async (startDate, endDate, excludeBookingId = null) =>
     return rows;
 };
 
+const validatePhone = (phone) => {
+    if (!phone) return false;
+    const cleanPhone = phone.replace(/[\s\-()]/g, "");
+    const phoneRegex = /^(?:\+?91|0)?[6-9]\d{9}$/;
+    return phoneRegex.test(cleanPhone);
+};
+
 // --- THEMES ---
 // Helper: attach media array to each theme
 async function attachThemeMedia(themes) {
@@ -380,7 +387,11 @@ router.get('/bookings/:id', authenticate, async (req, res) => {
 router.post('/bookings', authenticate, async (req, res) => {
     try {
         const { customerName, phone, startDate, endDate, totalAmount, advancePaid, themeId, notes } = req.body;
-        
+
+        if (!validatePhone(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
+        }
+
         if (!startDate || !endDate) {
             return res.status(400).json({ error: 'Start date and end date are required' });
         }
@@ -471,6 +482,10 @@ router.put('/bookings/:id', authenticate, async (req, res) => {
     try {
         const { id } = req.params;
         const { customerName, phone, startDate, endDate, totalAmount, notes, status } = req.body;
+
+        if (!validatePhone(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
+        }
 
         if (!startDate || !endDate) {
             return res.status(400).json({ error: 'Start date and end date are required' });
@@ -605,6 +620,10 @@ router.get('/enquiries/:id', authenticate, async (req, res) => {
 router.post('/enquiries', authenticate, async (req, res) => {
     try {
         const { name, phone, startDate, endDate, notes } = req.body;
+
+        if (!validatePhone(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
+        }
 
         if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
             return res.status(400).json({ error: 'End date cannot be before start date.' });
@@ -741,6 +760,9 @@ router.post('/public/enquiry', async (req, res) => {
         const { name, phone, startDate, endDate, notes } = req.body;
         if (!name || !phone) {
             return res.status(400).json({ error: 'Name and phone are required' });
+        }
+        if (!validatePhone(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
         }
         if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
             return res.status(400).json({ error: 'End date cannot be before start date.' });

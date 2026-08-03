@@ -66,6 +66,17 @@ export default function BookingCreate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const cleanPhone = formData.phone.replace(/[\s\-()]/g, "");
+    const phoneRegex = /^(?:\+?91|0)?[6-9]\d{9}$/;
+    if (!phoneRegex.test(cleanPhone)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid 10-digit mobile number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.startDate && formData.endDate) {
       const start = new Date(formData.startDate).getTime();
       const end = new Date(formData.endDate).getTime();
