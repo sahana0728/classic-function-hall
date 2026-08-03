@@ -39,7 +39,7 @@ export function PublicCalendar({ events }: PublicCalendarProps) {
 
     const getEventsForDay = (day: Date) => {
         return events.filter((e) => {
-            const s = startOfDay(new Date(e.startDate));
+            const s = startOfDay(new Date((e as any).blockedStartDate || e.startDate));
             const eDate = endOfDay(new Date(e.endDate));
             return day >= s && day <= eDate;
         });

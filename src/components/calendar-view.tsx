@@ -43,7 +43,7 @@ export function CalendarView({ events, onDateClick }: CalendarViewProps) {
   const getEventsForDay = (day: Date) => {
     return events.filter((e) => {
       // Create local dates stripping time components
-      const eventStart = new Date(e.startDate);
+      const eventStart = new Date((e as any).blockedStartDate || e.startDate);
       const eventEnd = new Date(e.endDate);
       const s = startOfDay(new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate()));
       const eDate = endOfDay(new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate()));

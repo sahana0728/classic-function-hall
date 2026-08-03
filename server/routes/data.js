@@ -58,9 +58,9 @@ const checkAvailability = async (startDate, endDate, excludeBookingId = null) =>
     let query = `
       SELECT id, "customerName", "startDate", "endDate" FROM bookings 
       WHERE status != 'Cancelled' AND
-        "endDate"::date >= $1::date
+        "endDate"::date > $1::date - INTERVAL '1 day'
         AND 
-        "startDate"::date <= $2::date
+        "startDate"::date - INTERVAL '1 day' < $2::date
     `;
     const params = [startDate, endDate];
     if (excludeBookingId) {
@@ -675,12 +675,16 @@ router.post('/enquiries/:id/convert', authenticate, async (req, res) => {
 router.get('/calendar', authenticate, async (req, res) => {
     try {
         const bookings = await db.query(`
-      SELECT id, "customerName" as title, "startDate", "endDate", 'booked' as type 
+      SELECT id, "customerName" as title, "startDate", "endDate", 
+             ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+             'booked' as type 
       FROM bookings
     `);
 
         const enquiries = await db.query(`
-      SELECT id, name as title, "startDate", "endDate", 'enquiry' as type 
+      SELECT id, name as title, "startDate", "endDate", 
+             ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+             'enquiry' as type 
       FROM enquiries
     `);
 
@@ -709,17 +713,21 @@ router.get('/public/themes', async (req, res) => {
 router.get('/public/calendar', async (req, res) => {
     try {
         const bookings = await db.query(`
-          SELECT "startDate", "endDate", 'booked' as type 
+          SELECT "startDate", "endDate", 
+                 ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+                 'booked' as type 
           FROM bookings
         `);
         const enquiries = await db.query(`
-          SELECT "startDate", "endDate", 'enquiry' as type 
+          SELECT "startDate", "endDate", 
+                 ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+                 'enquiry' as type 
           FROM enquiries
         `);
         // Return only dates + type, no names or IDs
         const events = [
-            ...bookings.rows.map(b => ({ startDate: b.startDate, endDate: b.endDate, type: b.type })),
-            ...enquiries.rows.map(e => ({ startDate: e.startDate, endDate: e.endDate, type: e.type })),
+            ...bookings.rows.map(b => ({ startDate: b.startDate, endDate: b.endDate, blockedStartDate: b.blockedStartDate, type: b.type })),
+            ...enquiries.rows.map(e => ({ startDate: e.startDate, endDate: e.endDate, blockedStartDate: e.blockedStartDate, type: e.type })),
         ];
         res.json(events);
     } catch (err) {
