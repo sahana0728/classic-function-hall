@@ -49,7 +49,7 @@ export default function EnquiryDetails() {
   });
 
   const convertMutation = useMutation({
-    mutationFn: async ({ id, ...data }: { id: string; totalAmount: number; advancePaid: number; themeId?: number }) => {
+    mutationFn: async ({ id, ...data }: { id: string; totalAmount: number | null; advancePaid: number | null; themeId?: number }) => {
       const res = await fetchWithAuth(`/api/enquiries/${id}/convert`, {
         method: "POST",
         body: JSON.stringify(data),
@@ -77,10 +77,10 @@ export default function EnquiryDetails() {
     e.preventDefault();
     if (!enquiry) return;
 
-    const totalAmount = Number(convertForm.totalAmount);
-    const advancePaid = Number(convertForm.advancePaid);
+    const totalAmount = convertForm.totalAmount === "" ? null : Number(convertForm.totalAmount);
+    const advancePaid = convertForm.advancePaid === "" ? null : Number(convertForm.advancePaid);
 
-    if (advancePaid > totalAmount) {
+    if (totalAmount !== null && advancePaid !== null && advancePaid > totalAmount) {
       toast({
         title: "Invalid Amount",
         description: "Advance Paid cannot be greater than Total Amount",
@@ -222,26 +222,24 @@ export default function EnquiryDetails() {
                   </p>
                </div>
               <div className="space-y-2">
-                <Label htmlFor="totalAmount" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Amount (₹)</Label>
+                <Label htmlFor="totalAmount" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Amount (₹) <span className="font-normal normal-case">(Optional)</span></Label>
                 <Input
                   id="totalAmount"
                   type="number"
                   min="0"
-                  required
-                  placeholder="e.g. 50000"
+                  placeholder="Can be recorded later"
                   value={convertForm.totalAmount}
                   onChange={e => setConvertForm({ ...convertForm, totalAmount: e.target.value })}
                   className="h-11 bg-muted/30"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="advancePaid" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Advance Paid (₹)</Label>
+                <Label htmlFor="advancePaid" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Advance Paid (₹) <span className="font-normal normal-case">(Optional)</span></Label>
                 <Input
                   id="advancePaid"
                   type="number"
                   min="0"
-                  required
-                  placeholder="e.g. 10000"
+                  placeholder="Can be recorded later"
                   value={convertForm.advancePaid}
                   onChange={e => setConvertForm({ ...convertForm, advancePaid: e.target.value })}
                   className="h-11 bg-muted/30"

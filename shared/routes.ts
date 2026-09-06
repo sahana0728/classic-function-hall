@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertThemeSchema, insertBookingSchema, insertEnquirySchema, users, themes, enquiries, loginSchema } from './schema';
+import { bookingDetailsSchema, insertThemeSchema, insertBookingSchema, insertEnquirySchema, users, themes, enquiries, loginSchema } from './schema';
 
 export const errorSchemas = {
   validation: z.object({ message: z.string(), field: z.string().optional() }),
@@ -74,12 +74,16 @@ export const api = {
         200: z.array(z.object({
           id: z.string(),
           customerName: z.string(),
+          phone: z.string().optional(),
+          address: z.string().nullable().optional(),
+          occasion: z.string().nullable().optional(),
           startDate: z.string(),
           endDate: z.string(),
-          totalAmount: z.union([z.string(), z.number()]).optional(),
-          advancePaid: z.union([z.string(), z.number()]).optional(),
+          totalAmount: z.union([z.string(), z.number()]).nullable().optional(),
+          advancePaid: z.union([z.string(), z.number()]).nullable().optional(),
           themeName: z.string().nullable(),
           themeImage: z.string().nullable(),
+          status: z.string().optional(),
         }))
       }
     },
@@ -97,6 +101,14 @@ export const api = {
       input: insertBookingSchema,
       responses: {
         201: z.object({ id: z.string(), message: z.string() })
+      }
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/bookings/:id' as const,
+      responses: {
+        200: z.object({ message: z.string() }),
+        404: errorSchemas.notFound
       }
     }
   },
@@ -123,6 +135,14 @@ export const api = {
       responses: {
         201: z.object({ id: z.string(), message: z.string() })
       }
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/enquiries/:id' as const,
+      responses: {
+        200: z.object({ message: z.string() }),
+        404: errorSchemas.notFound
+      }
     }
   },
   calendar: {
@@ -135,7 +155,6 @@ export const api = {
           title: z.string(),
           startDate: z.string(),
           endDate: z.string(),
-          blockedStartDate: z.string().optional(),
           type: z.enum(['booked', 'enquiry'])
         }))
       }

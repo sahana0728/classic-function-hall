@@ -1,4 +1,4 @@
-const CACHE_NAME = 'classic-hall-v1';
+const CACHE_NAME = 'classic-hall-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -36,6 +36,23 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('/api/') || event.request.url.includes('/auth/')) {
+    return;
+  }
+
+  // Always check the network first for page navigations so an installed PWA
+  // picks up a new Render deployment immediately. Use the cached shell offline.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
     return;
   }
 

@@ -117,7 +117,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <header className="safe-top bg-card border-b border-border px-4 py-3 flex items-center justify-between z-30 shadow-sm">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
-              <img src="/favicon.png?v=1.0.1" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
+              <img src="/favicon.png?v=1.0.2" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
             <div>
               <h1 className="font-display font-bold text-base leading-none text-primary">Classic</h1>
@@ -250,7 +250,7 @@ export function Layout({ children }: { children: ReactNode }) {
                     <LogOut className="w-5 h-5" />
                     <span className="font-medium">Sign Out</span>
                   </button>
-                  <p className="text-[10px] text-muted-foreground/60 text-center pt-2 font-mono">v1.0.1</p>
+                  <p className="text-[10px] text-muted-foreground/60 text-center pt-2 font-mono">v1.0.2</p>
                 </div>
               </motion.div>
             </>
@@ -414,7 +414,7 @@ export function Layout({ children }: { children: ReactNode }) {
       >
         <div className="p-6 border-b border-border/50 flex items-center gap-3 text-primary">
           <div className="w-10 h-10 rounded-xl overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
-            <img src="/favicon.png?v=1.0.1" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
+            <img src="/favicon.png?v=1.0.2" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
           </div>
           <div>
             <h1 className="font-display font-bold text-xl leading-none">Classic</h1>
@@ -470,7 +470,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
-          <p className="text-[10px] text-muted-foreground/60 text-center pt-1 font-mono">v1.0.1</p>
+          <p className="text-[10px] text-muted-foreground/60 text-center pt-1 font-mono">v1.0.2</p>
         </div>
       </motion.aside>
 

@@ -53,7 +53,9 @@ const createAuditLog = async (action, entityId, entityType, performedBy, details
     }
 };
 
-// Helper: Check Availability (strict date logic, 4PM block is handled via communicative messages to user)
+// Event dates remain the calendar dates. Each booking's actual possession window
+// starts at 4 PM on the day before startDate and ends at 4 PM on endDate.
+// Strict inequalities allow consecutive bookings to hand over at the same 4 PM.
 const checkAvailability = async (startDate, endDate, excludeBookingId = null) => {
     let query = `
       SELECT id, "customerName", "startDate", "endDate" FROM bookings 
@@ -69,6 +71,12 @@ const checkAvailability = async (startDate, endDate, excludeBookingId = null) =>
     }
     const { rows } = await db.query(query, params);
     return rows;
+};
+
+const optionalAmount = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    const amount = Number(value);
+    return Number.isFinite(amount) ? amount : NaN;
 };
 
 const validatePhone = (phone) => {
@@ -373,9 +381,11 @@ router.get('/bookings/:id', authenticate, async (req, res) => {
 
         res.json({
             ...booking,
-            totalAmount: Number(booking.totalAmount),
-            advancePaid: Number(booking.advancePaid),
-            balanceLeft: Number(booking.totalAmount) - Number(booking.advancePaid),
+            totalAmount: booking.totalAmount == null ? null : Number(booking.totalAmount),
+            advancePaid: booking.advancePaid == null ? null : Number(booking.advancePaid),
+            balanceLeft: booking.totalAmount == null
+                ? null
+                : Number(booking.totalAmount) - Number(booking.advancePaid || 0),
             decorations: decoResult.rows,
             payments: payResult.rows
         });
@@ -386,7 +396,11 @@ router.get('/bookings/:id', authenticate, async (req, res) => {
 
 router.post('/bookings', authenticate, async (req, res) => {
     try {
-        const { customerName, phone, startDate, endDate, totalAmount, advancePaid, themeId, notes } = req.body;
+        const { customerName, phone, occasion, startDate, endDate, totalAmount, advancePaid, themeId, notes } = req.body;
+        const address = req.body.address?.trim() || null;
+        const normalizedOccasion = occasion?.trim() || null;
+        const normalizedTotal = optionalAmount(totalAmount);
+        const normalizedAdvance = optionalAmount(advancePaid);
 
         if (!validatePhone(phone)) {
             return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
@@ -400,7 +414,11 @@ router.post('/bookings', authenticate, async (req, res) => {
             return res.status(400).json({ error: 'End date cannot be before start date.' });
         }
 
-        if (Number(advancePaid) > Number(totalAmount)) {
+        if (Number.isNaN(normalizedTotal) || normalizedTotal < 0 || Number.isNaN(normalizedAdvance) || normalizedAdvance < 0) {
+            return res.status(400).json({ error: 'Payment amounts must be valid non-negative numbers.' });
+        }
+
+        if (normalizedTotal !== null && normalizedAdvance !== null && normalizedAdvance > normalizedTotal) {
             return res.status(400).json({ error: 'Advance amount cannot be greater than the total amount.' });
         }
 
@@ -408,7 +426,7 @@ router.post('/bookings', authenticate, async (req, res) => {
         const overlaps = await checkAvailability(startDate, endDate);
         if (overlaps.length > 0) {
             return res.status(409).json({ 
-                error: 'The selected dates (including the 24-hr advance block) overlap with an existing booking.',
+                error: 'The hall access window (4 PM the previous day to 4 PM on the end date) overlaps with an existing booking.',
                 conflicts: overlaps 
             });
         }
@@ -416,18 +434,18 @@ router.post('/bookings', authenticate, async (req, res) => {
         const id = Date.now().toString();
 
         await db.query(`
-      INSERT INTO bookings (id, "customerName", phone, "startDate", "endDate", "totalAmount", "advancePaid", "themeId", notes, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Booked')
-    `, [id, customerName, phone, startDate, endDate, totalAmount, advancePaid, themeId || null, notes]);
+      INSERT INTO bookings (id, "customerName", phone, address, occasion, "startDate", "endDate", "totalAmount", "advancePaid", "themeId", notes, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'Booked')
+    `, [id, customerName, phone, address, normalizedOccasion, startDate, endDate, normalizedTotal, normalizedAdvance, themeId || null, notes]);
 
-        if (Number(advancePaid) > 0) {
+        if (normalizedAdvance !== null && normalizedAdvance > 0) {
             await db.query(
                 `INSERT INTO booking_payments (booking_id, amount, recorded_by) VALUES ($1, $2, $3)`,
-                [id, Number(advancePaid), req.user.name || req.user.email]
+                [id, normalizedAdvance, req.user.name || req.user.email]
             );
         }
 
-        await createAuditLog('CREATE_BOOKING', id, 'booking', req.user.email, { customerName, startDate, endDate });
+        await createAuditLog('CREATE_BOOKING', id, 'booking', req.user.email, { customerName, startDate, endDate, address, occasion: normalizedOccasion });
 
         res.json({ id, message: 'Booking created successfully' });
     } catch (err) {
@@ -455,9 +473,9 @@ router.post('/bookings/:id/payments', authenticate, async (req, res) => {
         }
         
         const booking = rows[0];
-        const newAdvancePaid = Number(booking.advancePaid) + numericAmount;
+        const newAdvancePaid = Number(booking.advancePaid || 0) + numericAmount;
         
-        if (newAdvancePaid > Number(booking.totalAmount)) {
+        if (booking.totalAmount != null && newAdvancePaid > Number(booking.totalAmount)) {
              console.log(`Payment exceeds total: newTotal=${newAdvancePaid}, limit=${booking.totalAmount}`);
              return res.status(400).json({ error: 'Payment exceeds total amount' });
         }
@@ -481,7 +499,10 @@ router.post('/bookings/:id/payments', authenticate, async (req, res) => {
 router.put('/bookings/:id', authenticate, async (req, res) => {
     try {
         const { id } = req.params;
-        const { customerName, phone, startDate, endDate, totalAmount, notes, status } = req.body;
+        const { customerName, phone, startDate, endDate, notes, status } = req.body;
+        const address = req.body.address?.trim() || null;
+        const occasion = req.body.occasion?.trim() || null;
+        const normalizedTotal = optionalAmount(req.body.totalAmount);
 
         if (!validatePhone(phone)) {
             return res.status(400).json({ error: 'Invalid phone number. Please enter a valid 10-digit mobile number.' });
@@ -493,6 +514,10 @@ router.put('/bookings/:id', authenticate, async (req, res) => {
 
         if (new Date(endDate) < new Date(startDate)) {
             return res.status(400).json({ error: 'End date cannot be before start date.' });
+        }
+
+        if (Number.isNaN(normalizedTotal) || normalizedTotal < 0) {
+            return res.status(400).json({ error: 'Total amount must be a valid non-negative number.' });
         }
 
         // Check if there's any overlaps, excluding current booking
@@ -510,17 +535,18 @@ router.put('/bookings/:id', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Booking not found' });
         }
         const currentBooking = currentBookingQuery.rows[0];
-        if (Number(totalAmount) < Number(currentBooking.advancePaid)) {
+        if (normalizedTotal !== null && normalizedTotal < Number(currentBooking.advancePaid || 0)) {
             return res.status(400).json({ error: `Total amount cannot be less than the already paid amount of ₹${currentBooking.advancePaid.toLocaleString()}` });
         }
 
         await db.query(`
             UPDATE bookings 
-            SET "customerName" = $1, phone = $2, "startDate" = $3, "endDate" = $4, "totalAmount" = $5, notes = $6, status = $7
-            WHERE id = $8
-        `, [customerName, phone, startDate, endDate, totalAmount, notes, status || 'Booked', id]);
+            SET "customerName" = $1, phone = $2, address = $3, occasion = $4,
+                "startDate" = $5, "endDate" = $6, "totalAmount" = $7, notes = $8, status = $9
+            WHERE id = $10
+        `, [customerName, phone, address, occasion, startDate, endDate, normalizedTotal, notes, status || 'Booked', id]);
 
-        await createAuditLog('UPDATE_BOOKING', id, 'booking', req.user.email, { customerName, startDate, endDate, totalAmount, status });
+        await createAuditLog('UPDATE_BOOKING', id, 'booking', req.user.email, { customerName, startDate, endDate, totalAmount: normalizedTotal, address, occasion, status });
 
         res.json({ message: 'Booking updated successfully' });
     } catch (err) {
@@ -592,6 +618,37 @@ router.delete('/bookings/:id/decorations/:decorationId', authenticate, async (re
     }
 });
 
+// Delete an entire booking and all owned records atomically. The explicit child
+// deletes also support older production databases created before cascade rules.
+router.delete('/bookings/:id', authenticate, async (req, res) => {
+    let client;
+    try {
+        client = await db.connect();
+        const { id } = req.params;
+        await client.query('BEGIN');
+        const bookingResult = await client.query('SELECT "customerName" FROM bookings WHERE id = $1 FOR UPDATE', [id]);
+        if (bookingResult.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+        await client.query('DELETE FROM booking_payments WHERE booking_id = $1', [id]);
+        await client.query('DELETE FROM booking_decorations WHERE booking_id = $1', [id]);
+        const result = await client.query('DELETE FROM bookings WHERE id = $1 RETURNING "customerName"', [id]);
+        if (result.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+        await client.query('COMMIT');
+        await createAuditLog('DELETE_BOOKING', id, 'booking', req.user.email, { customerName: result.rows[0].customerName });
+        res.json({ message: 'Booking deleted successfully' });
+    } catch (err) {
+        if (client) await client.query('ROLLBACK').catch(() => {});
+        res.status(500).json({ error: err.message });
+    } finally {
+        client?.release();
+    }
+});
+
 // --- ENQUIRIES ---
 router.get('/enquiries', authenticate, async (req, res) => {
     try {
@@ -644,13 +701,32 @@ router.post('/enquiries', authenticate, async (req, res) => {
     }
 });
 
+router.delete('/enquiries/:id', authenticate, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await db.query('DELETE FROM enquiries WHERE id = $1 RETURNING name', [id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Enquiry not found' });
+        }
+        await createAuditLog('DELETE_ENQUIRY', id, 'enquiry', req.user.email, { name: result.rows[0].name });
+        res.json({ message: 'Enquiry deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Convert Enquiry to Booking
 router.post('/enquiries/:id/convert', authenticate, async (req, res) => {
     try {
         const { id } = req.params;
         const { totalAmount, advancePaid, themeId } = req.body;
+        const normalizedTotal = optionalAmount(totalAmount);
+        const normalizedAdvance = optionalAmount(advancePaid);
 
-        if (Number(advancePaid) > Number(totalAmount)) {
+        if (Number.isNaN(normalizedTotal) || normalizedTotal < 0 || Number.isNaN(normalizedAdvance) || normalizedAdvance < 0) {
+            return res.status(400).json({ error: 'Payment amounts must be valid non-negative numbers.' });
+        }
+        if (normalizedTotal !== null && normalizedAdvance !== null && normalizedAdvance > normalizedTotal) {
             return res.status(400).json({ error: 'Advance amount cannot be greater than the total amount.' });
         }
 
@@ -666,7 +742,7 @@ router.post('/enquiries/:id/convert', authenticate, async (req, res) => {
         const overlaps = await checkAvailability(enquiry.startDate, enquiry.endDate);
         if (overlaps.length > 0) {
             return res.status(409).json({ 
-                error: 'Cannot convert: The dates (including the 24-hr advance block) overlap with an existing booking.',
+                error: 'Cannot convert: The hall access window overlaps with an existing booking.',
                 conflicts: overlaps 
             });
         }
@@ -677,7 +753,7 @@ router.post('/enquiries/:id/convert', authenticate, async (req, res) => {
         await db.query(`
       INSERT INTO bookings (id, "customerName", phone, "startDate", "endDate", "totalAmount", "advancePaid", "themeId", notes, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Booked')
-    `, [bookingId, enquiry.name, enquiry.phone, enquiry.startDate, enquiry.endDate, totalAmount || 0, advancePaid || 0, themeId || null, enquiry.notes]);
+    `, [bookingId, enquiry.name, enquiry.phone, enquiry.startDate, enquiry.endDate, normalizedTotal, normalizedAdvance, themeId || null, enquiry.notes]);
 
         // Delete the enquiry
         await db.query('DELETE FROM enquiries WHERE id = $1', [id]);
@@ -694,15 +770,13 @@ router.post('/enquiries/:id/convert', authenticate, async (req, res) => {
 router.get('/calendar', authenticate, async (req, res) => {
     try {
         const bookings = await db.query(`
-      SELECT id, "customerName" as title, "startDate", "endDate", 
-             ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+      SELECT id, "customerName" as title, "startDate", "endDate",
              'booked' as type 
       FROM bookings
     `);
 
         const enquiries = await db.query(`
-      SELECT id, name as title, "startDate", "endDate", 
-             ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+      SELECT id, name as title, "startDate", "endDate",
              'enquiry' as type 
       FROM enquiries
     `);
@@ -732,21 +806,19 @@ router.get('/public/themes', async (req, res) => {
 router.get('/public/calendar', async (req, res) => {
     try {
         const bookings = await db.query(`
-          SELECT "startDate", "endDate", 
-                 ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+          SELECT "startDate", "endDate",
                  'booked' as type 
           FROM bookings
         `);
         const enquiries = await db.query(`
-          SELECT "startDate", "endDate", 
-                 ("startDate"::date - INTERVAL '1 day')::text as "blockedStartDate",
+          SELECT "startDate", "endDate",
                  'enquiry' as type 
           FROM enquiries
         `);
         // Return only dates + type, no names or IDs
         const events = [
-            ...bookings.rows.map(b => ({ startDate: b.startDate, endDate: b.endDate, blockedStartDate: b.blockedStartDate, type: b.type })),
-            ...enquiries.rows.map(e => ({ startDate: e.startDate, endDate: e.endDate, blockedStartDate: e.blockedStartDate, type: e.type })),
+            ...bookings.rows.map(b => ({ startDate: b.startDate, endDate: b.endDate, type: b.type })),
+            ...enquiries.rows.map(e => ({ startDate: e.startDate, endDate: e.endDate, type: e.type })),
         ];
         res.json(events);
     } catch (err) {

@@ -37,10 +37,12 @@ const initSchema = async () => {
         id TEXT PRIMARY KEY,
         "customerName" TEXT NOT NULL,
         phone TEXT NOT NULL,
+        address TEXT,
+        occasion TEXT,
         "startDate" TEXT NOT NULL,
         "endDate" TEXT NOT NULL,
-        "totalAmount" REAL NOT NULL,
-        "advancePaid" REAL NOT NULL,
+        "totalAmount" REAL,
+        "advancePaid" REAL,
         "themeId" INTEGER,
         notes TEXT,
         status TEXT DEFAULT 'Booked',
@@ -76,6 +78,10 @@ const initSchema = async () => {
 
       ALTER TABLE booking_payments ADD COLUMN IF NOT EXISTS recorded_by TEXT;
       ALTER TABLE enquiries ADD COLUMN IF NOT EXISTS viewed BOOLEAN DEFAULT FALSE;
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address TEXT;
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS occasion TEXT;
+      ALTER TABLE bookings ALTER COLUMN "totalAmount" DROP NOT NULL;
+      ALTER TABLE bookings ALTER COLUMN "advancePaid" DROP NOT NULL;
 
       CREATE TABLE IF NOT EXISTS theme_media (
         id SERIAL PRIMARY KEY,

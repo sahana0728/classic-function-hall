@@ -30,8 +30,10 @@ export default function BookingCreate() {
   const [formData, setFormData] = useState({
     customerName: "",
     phone: "",
+    address: "",
     startDate: initialDate,
     endDate: initialDate,
+    occasion: "",
     themeId: "",
     totalAmount: "",
     advancePaid: "",
@@ -100,10 +102,10 @@ export default function BookingCreate() {
       });
       setLocation("/enquiries");
     } else {
-      const totalAmount = Number(formData.totalAmount);
-      const advancePaid = Number(formData.advancePaid);
+      const totalAmount = formData.totalAmount === "" ? null : Number(formData.totalAmount);
+      const advancePaid = formData.advancePaid === "" ? null : Number(formData.advancePaid);
 
-      if (advancePaid > totalAmount) {
+      if (totalAmount !== null && advancePaid !== null && advancePaid > totalAmount) {
         toast({
           title: "Invalid Amount",
           description: "Advance Paid cannot be greater than Total Amount",
@@ -119,6 +121,8 @@ export default function BookingCreate() {
         themeId: formData.themeId ? Number(formData.themeId) : null,
         totalAmount,
         advancePaid,
+        address: formData.address.trim() || null,
+        occasion: formData.occasion.trim() || null,
       });
       setLocation("/bookings");
     }
@@ -178,6 +182,18 @@ export default function BookingCreate() {
                   className="h-12 bg-muted/30"
                 />
               </div>
+              {!isEnquiryMode && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="address">Address <span className="font-normal text-muted-foreground">(Optional)</span></Label>
+                  <Textarea
+                    id="address"
+                    placeholder="Customer address"
+                    value={formData.address}
+                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    className="min-h-20 resize-none bg-muted/30"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -191,7 +207,7 @@ export default function BookingCreate() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
+                <Label htmlFor="startDate">Event Start Date</Label>
                 <Input
                   id="startDate"
                   type="date"
@@ -209,7 +225,7 @@ export default function BookingCreate() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
+                <Label htmlFor="endDate">Event End Date</Label>
                 <Input
                   id="endDate"
                   type="date"
@@ -236,6 +252,19 @@ export default function BookingCreate() {
                     <br />
                     <span className="text-muted-foreground mt-1 block">The calendar will solely block the selected dates.</span>
                   </p>
+                </div>
+              )}
+
+              {!isEnquiryMode && (
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="occasion">Occasion <span className="font-normal text-muted-foreground">(Optional)</span></Label>
+                  <Input
+                    id="occasion"
+                    placeholder="e.g. Reception, wedding, birthday"
+                    value={formData.occasion}
+                    onChange={e => setFormData({ ...formData, occasion: e.target.value })}
+                    className="h-12 bg-muted/30"
+                  />
                 </div>
               )}
 
@@ -280,26 +309,24 @@ export default function BookingCreate() {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                   <div className="space-y-2">
-                    <Label htmlFor="totalAmount">Total Amount (₹)</Label>
+                    <Label htmlFor="totalAmount">Total Amount (₹) <span className="font-normal text-muted-foreground">(Optional)</span></Label>
                     <Input
                       id="totalAmount"
                       type="number"
                       min="0"
-                      required
-                      placeholder="0"
+                      placeholder="Can be recorded later"
                       value={formData.totalAmount}
                       onChange={e => setFormData({ ...formData, totalAmount: e.target.value })}
                       className="h-12 bg-muted/30 text-lg font-semibold"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="advancePaid">Advance Paid (₹)</Label>
+                    <Label htmlFor="advancePaid">Advance Paid (₹) <span className="font-normal text-muted-foreground">(Optional)</span></Label>
                     <Input
                       id="advancePaid"
                       type="number"
                       min="0"
-                      required
-                      placeholder="0"
+                      placeholder="Can be recorded later"
                       value={formData.advancePaid}
                       onChange={e => setFormData({ ...formData, advancePaid: e.target.value })}
                       className="h-12 bg-muted/30 text-lg font-semibold text-green-600"
@@ -307,9 +334,13 @@ export default function BookingCreate() {
                   </div>
                   <div className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex flex-col justify-center h-auto min-h-12 mb-0">
                     <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Balance Left</span>
-                    <span className={`text-xl font-bold font-display ${balance > 0 ? 'text-destructive' : 'text-primary'}`}>
-                      ₹{balance > 0 ? balance.toLocaleString() : "0"}
-                    </span>
+                    {formData.totalAmount === "" ? (
+                      <span className="text-sm font-semibold text-muted-foreground">Not recorded</span>
+                    ) : (
+                      <span className={`text-xl font-bold font-display ${balance > 0 ? 'text-destructive' : 'text-primary'}`}>
+                        ₹{Math.max(balance, 0).toLocaleString()}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

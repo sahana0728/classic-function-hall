@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { AuditLogTimeline } from "@/components/audit-log-timeline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, subDays } from "date-fns";
-import { ArrowLeft, Loader2, Calendar, Phone, DollarSign, Palette, Pencil, Save, X, Film, Plus, Upload, Trash2, ImageIcon, CheckCircle2, History } from "lucide-react";
+import { ArrowLeft, Loader2, Calendar, Phone, DollarSign, Palette, Pencil, Save, X, Film, Plus, Upload, Trash2, ImageIcon, CheckCircle2, History, MapPin, PartyPopper } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -104,6 +104,8 @@ export default function BookingDetails() {
   const [editForm, setEditForm] = useState({
     customerName: "",
     phone: "",
+    address: "",
+    occasion: "",
     startDate: "",
     endDate: "",
     totalAmount: "",
@@ -117,7 +119,7 @@ export default function BookingDetails() {
         method: "PUT",
         body: JSON.stringify({
           ...data,
-          totalAmount: Number(data.totalAmount)
+          totalAmount: data.totalAmount === "" ? null : Number(data.totalAmount)
         }),
       });
       if (!res.ok) {
@@ -221,7 +223,10 @@ export default function BookingDetails() {
     );
   }
 
-  const balanceLeft = booking.totalAmount - booking.advancePaid;
+  const totalAmount = booking.totalAmount == null ? null : Number(booking.totalAmount);
+  const amountPaid = Number(booking.advancePaid || 0);
+  const balanceLeft = totalAmount == null ? null : totalAmount - amountPaid;
+  const canAddPayment = balanceLeft === null || balanceLeft > 0;
   const decorations = booking.decorations || [];
   const isClosed = isBookingClosed(booking);
 
@@ -251,9 +256,11 @@ export default function BookingDetails() {
                   setEditForm({
                     customerName: booking.customerName,
                     phone: booking.phone,
+                    address: booking.address || "",
+                    occasion: booking.occasion || "",
                     startDate: booking.startDate ? booking.startDate.split('T')[0] : "",
                     endDate: booking.endDate ? booking.endDate.split('T')[0] : "",
-                    totalAmount: booking.totalAmount.toString(),
+                    totalAmount: booking.totalAmount == null ? "" : booking.totalAmount.toString(),
                     notes: booking.notes || "",
                     status: booking.status
                   });
@@ -274,21 +281,28 @@ export default function BookingDetails() {
               <span className="text-muted-foreground flex items-center gap-2"><Phone className="w-4 h-4" /> Phone:</span>
               <span className="font-semibold">{booking.phone}</span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-border">
-              <span className="text-muted-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Event Dates:</span>
-              <span className="font-semibold text-sm">{format(new Date(booking.startDate), "MMM d")} - {format(new Date(booking.endDate), "MMM d")}</span>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-muted-foreground flex items-center gap-2"><MapPin className="w-4 h-4" /> Address:</span>
+              <span className="max-w-[60%] text-right text-sm font-semibold">{booking.address || "Not provided"}</span>
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-muted-foreground flex items-center gap-2"><PartyPopper className="w-4 h-4" /> Occasion:</span>
+              <span className="max-w-[60%] text-right text-sm font-semibold">{booking.occasion || "Not provided"}</span>
+            </div>
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground flex items-center gap-2"><Calendar className="w-4 h-4" /> Start Date:</span>
+                <span className="font-semibold text-sm">{format(subDays(new Date(booking.startDate), 1), "MMM d, yyyy")} at 4:00 PM</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">End Date:</span>
+                <span className="font-semibold text-sm">{format(new Date(booking.endDate), "MMM d, yyyy")} at 4:00 PM</span>
+              </div>
             </div>
             <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg text-xs text-primary flex items-start gap-2">
               <CheckCircle2 className="w-4 h-4 mt-0.5" />
               <p>
-                <strong>Availability Note:</strong> Hall explicitly available from{' '}
-                <strong>
-                  {format(subDays(new Date(booking.startDate), 1), "MMM d, yyyy")} at 4:00 PM
-                </strong>{' '}
-                until{' '}
-                <strong>
-                  {format(new Date(booking.endDate), "MMM d, yyyy")} at 4:00 PM
-                </strong>.
+                <strong>Calendar:</strong> Only the selected event date{booking.startDate !== booking.endDate ? "s are" : " is"} blocked ({format(new Date(booking.startDate), "MMM d")} – {format(new Date(booking.endDate), "MMM d")}).
               </p>
             </div>
           </div>
@@ -302,16 +316,18 @@ export default function BookingDetails() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-muted/40 rounded-xl p-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total</p>
-              <p className="text-xl font-display font-bold text-primary">₹{booking.totalAmount.toLocaleString()}</p>
+              <p className="text-xl font-display font-bold text-primary">
+                {totalAmount === null ? <span className="text-sm text-muted-foreground">Not recorded</span> : `₹${totalAmount.toLocaleString()}`}
+              </p>
             </div>
             <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-3 border border-green-200/50 group relative">
               <div className="flex justify-between items-center mb-1">
                 <p className="text-xs font-semibold text-green-700 uppercase tracking-wider">Total Paid</p>
               </div>
               
-              <p className="text-xl font-display font-bold text-green-600 mb-3">₹{booking.advancePaid.toLocaleString()}</p>
+              <p className="text-xl font-display font-bold text-green-600 mb-3">₹{amountPaid.toLocaleString()}</p>
 
-              {balanceLeft > 0 ? (
+              {canAddPayment ? (
                 !isEditingAdvance ? (
                   <Button 
                      onClick={() => setIsEditingAdvance(true)}
@@ -329,7 +345,7 @@ export default function BookingDetails() {
                         autoFocus
                         type="number" 
                         min="1"
-                        max={balanceLeft}
+                        max={balanceLeft ?? undefined}
                         placeholder="Amount"
                         value={editedAdvance} 
                         onChange={e => setEditedAdvance(e.target.value)} 
@@ -339,7 +355,7 @@ export default function BookingDetails() {
                     <div className="flex gap-1 justify-end">
                       <button 
                         onClick={() => addPayment.mutate(Number(editedAdvance))} 
-                        disabled={addPayment.isPending || !editedAdvance || isNaN(Number(editedAdvance)) || Number(editedAdvance) <= 0 || Number(editedAdvance) > balanceLeft} 
+                        disabled={addPayment.isPending || !editedAdvance || isNaN(Number(editedAdvance)) || Number(editedAdvance) <= 0 || (balanceLeft !== null && Number(editedAdvance) > balanceLeft)}
                         className="flex-1 h-7 flex items-center justify-center bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded shadow-sm text-xs font-semibold gap-1"
                       >
                         {addPayment.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -364,7 +380,9 @@ export default function BookingDetails() {
               ? 'bg-green-50 border-green-200/50'
               : 'bg-yellow-50 border-yellow-200/50'}`}>
               <p className={`text-xs font-semibold ${balanceLeft === 0 ? 'text-green-700' : 'text-yellow-700'} uppercase tracking-wider mb-1`}>Balance</p>
-              <p className={`text-xl font-display font-bold ${balanceLeft === 0 ? 'text-green-600' : 'text-yellow-600'}`}>₹{balanceLeft.toLocaleString()}</p>
+              <p className={`text-xl font-display font-bold ${balanceLeft === 0 ? 'text-green-600' : 'text-yellow-600'}`}>
+                {balanceLeft === null ? <span className="text-sm text-muted-foreground">Not available</span> : `₹${balanceLeft.toLocaleString()}`}
+              </p>
             </div>
           </div>
           
@@ -609,9 +627,29 @@ export default function BookingDetails() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-address">Address <span className="font-normal text-muted-foreground">(Optional)</span></Label>
+                <Textarea
+                  id="edit-address"
+                  value={editForm.address}
+                  onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                  className="h-20 resize-none rounded-xl bg-muted/20 border-border"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-occasion">Occasion <span className="font-normal text-muted-foreground">(Optional)</span></Label>
+                <Input
+                  id="edit-occasion"
+                  value={editForm.occasion}
+                  onChange={e => setEditForm({ ...editForm, occasion: e.target.value })}
+                  className="h-11 rounded-xl bg-muted/20 border-border"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-start">Start Date *</Label>
+                  <Label htmlFor="edit-start">Event Start *</Label>
                   <Input
                     id="edit-start"
                     type="date"
@@ -629,7 +667,7 @@ export default function BookingDetails() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-end">End Date *</Label>
+                  <Label htmlFor="edit-end">Event End *</Label>
                   <Input
                     id="edit-end"
                     type="date"
@@ -644,11 +682,10 @@ export default function BookingDetails() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-amount">Total Amount (₹) *</Label>
+                  <Label htmlFor="edit-amount">Total Amount (₹) <span className="font-normal text-muted-foreground">(Optional)</span></Label>
                   <Input
                     id="edit-amount"
                     type="number"
-                    required
                     min="0"
                     value={editForm.totalAmount}
                     onChange={e => setEditForm({ ...editForm, totalAmount: e.target.value })}

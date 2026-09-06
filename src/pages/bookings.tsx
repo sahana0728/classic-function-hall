@@ -1,9 +1,19 @@
-import { useBookings } from "@/hooks/use-bookings";
+import { useBookings, useDeleteBooking } from "@/hooks/use-bookings";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
-import { Plus, Search, Loader2, ChevronRight, Calendar, Phone } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format, subDays } from "date-fns";
+import { Plus, Search, Loader2, ChevronRight, Calendar, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -12,15 +22,21 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export function isBookingClosed(booking: any) {
   if (!booking.endDate) return false;
   const isPast = new Date(booking.endDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
-  const isFullyPaid = Number(booking.advancePaid || 0) >= Number(booking.totalAmount || 0);
+  const isFullyPaid = booking.totalAmount !== null
+    && booking.totalAmount !== undefined
+    && Number(booking.advancePaid || 0) >= Number(booking.totalAmount);
   return isPast && isFullyPaid;
 }
+
+const hallAccessDate = (startDate: string) => subDays(new Date(startDate), 1);
 
 export default function Bookings() {
   const [, setLocation] = useLocation();
   const { data: bookings = [], isLoading } = useBookings();
+  const deleteBooking = useDeleteBooking();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("active");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const isMobile = useIsMobile();
 
   const filteredBookings = bookings.filter(b => 
@@ -41,12 +57,11 @@ export default function Bookings() {
         </div>
       ) : (
         displayedBookings.map((booking) => (
-          <button
+          <article
             key={booking.id}
-            onClick={() => setLocation(`/bookings/${booking.id}`)}
             className="mobile-card w-full text-left"
           >
-            <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setLocation(`/bookings/${booking.id}`)} className="flex w-full items-center gap-3 text-left">
               <img 
                 src={booking.themeImage} 
                 alt={booking.themeName}
@@ -58,19 +73,33 @@ export default function Bookings() {
                 <p className="text-xs text-muted-foreground mt-0.5">{booking.themeName || "No theme"}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </div>
+            </button>
             <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-border/50">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>{format(new Date(booking.startDate), "MMM d")} - {format(new Date(booking.endDate), "MMM d")}</span>
+                <span>{format(hallAccessDate(booking.startDate), "MMM d")} at 4 PM – {format(new Date(booking.endDate), "MMM d")} at 4 PM</span>
               </div>
-              {booking.totalAmount && (
+              {booking.totalAmount !== null && booking.totalAmount !== undefined && (
                 <span className="text-xs font-semibold text-primary ml-auto">
                   ₹{Number(booking.totalAmount).toLocaleString()}
                 </span>
               )}
             </div>
-          </button>
+            <div className="mt-3 flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setLocation(`/bookings/${booking.id}`)} className="flex-1">
+                View Details
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setDeleteTarget({ id: booking.id, name: booking.customerName })}
+                className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Delete booking for ${booking.customerName}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </article>
         ))
       )}
     </div>
@@ -84,8 +113,8 @@ export default function Bookings() {
           <TableRow>
             <TableHead className="font-semibold text-foreground">Customer</TableHead>
             <TableHead className="font-semibold text-foreground">Theme</TableHead>
-            <TableHead className="font-semibold text-foreground">Start Date</TableHead>
-            <TableHead className="font-semibold text-foreground">End Date</TableHead>
+            <TableHead className="font-semibold text-foreground">Hall Access</TableHead>
+            <TableHead className="font-semibold text-foreground">Hand-over</TableHead>
             <TableHead className="text-right font-semibold text-foreground">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -104,17 +133,29 @@ export default function Bookings() {
                   {booking.themeName}
                 </div>
               </TableCell>
-              <TableCell>{format(new Date(booking.startDate), "MMM d, yyyy")}</TableCell>
-              <TableCell>{format(new Date(booking.endDate), "MMM d, yyyy")}</TableCell>
+              <TableCell>{format(hallAccessDate(booking.startDate), "MMM d, yyyy")} · 4 PM</TableCell>
+              <TableCell>{format(new Date(booking.endDate), "MMM d, yyyy")} · 4 PM</TableCell>
               <TableCell className="text-right">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setLocation(`/bookings/${booking.id}`)}
-                  className="text-primary hover:text-primary"
-                >
-                  View Details
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLocation(`/bookings/${booking.id}`)}
+                    className="text-primary hover:text-primary"
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeleteTarget({ id: booking.id, name: booking.customerName })}
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Delete booking for ${booking.customerName}`}
+                    title="Delete booking"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -178,6 +219,34 @@ export default function Bookings() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => {
+        if (!open && !deleteBooking.isPending) setDeleteTarget(null);
+      }}>
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-lg rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this booking?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The booking for <strong className="text-foreground">{deleteTarget?.name}</strong> will be permanently removed from the directory and calendar. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBooking.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteBooking.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(event) => {
+                event.preventDefault();
+                if (!deleteTarget) return;
+                deleteBooking.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+              }}
+            >
+              {deleteBooking.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteBooking.isPending ? "Deleting…" : "Delete booking"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

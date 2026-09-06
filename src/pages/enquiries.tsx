@@ -3,12 +3,23 @@ import { api } from "@shared/routes";
 import { fetchWithAuth, parseWithLogging } from "@/lib/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Loader2, MessageSquare, Plus, ChevronRight, Calendar, Phone, Search, Calendar as CalendarIcon, X } from "lucide-react";
+import { Loader2, MessageSquare, Plus, ChevronRight, Calendar, Phone, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useDeleteEnquiry } from "@/hooks/use-enquiries";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Enquiries() {
   const [, setLocation] = useLocation();
@@ -16,6 +27,8 @@ export default function Enquiries() {
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const deleteEnquiry = useDeleteEnquiry();
 
   const { data: enquiries = [], isLoading } = useQuery({
     queryKey: [api.enquiries.list.path],
@@ -75,12 +88,11 @@ export default function Enquiries() {
         </div>
       ) : (
         filteredEnquiries.map((enquiry: any) => (
-          <button
+          <article
             key={enquiry.id}
-            onClick={() => setLocation(`/enquiries/${enquiry.id}`)}
             className="mobile-card w-full text-left border-l-4 border-l-yellow-400"
           >
-            <div className="flex items-center justify-between">
+            <button type="button" onClick={() => setLocation(`/enquiries/${enquiry.id}`)} className="flex w-full items-center justify-between text-left">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground text-sm truncate">{enquiry.name}</h3>
                 <div className="flex items-center gap-1.5 mt-1">
@@ -89,7 +101,7 @@ export default function Enquiries() {
                 </div>
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </div>
+            </button>
             <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-border/50">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Calendar className="w-3.5 h-3.5" />
@@ -103,7 +115,21 @@ export default function Enquiries() {
                 <p className="text-xs text-muted-foreground truncate ml-auto max-w-[40%]">{enquiry.notes}</p>
               )}
             </div>
-          </button>
+            <div className="mt-3 flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setLocation(`/enquiries/${enquiry.id}`)} className="flex-1">
+                View Details
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setDeleteTarget({ id: enquiry.id, name: enquiry.name })}
+                className="shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Delete enquiry from ${enquiry.name}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </article>
         ))
       )}
     </div>
@@ -132,14 +158,26 @@ export default function Enquiries() {
               <TableCell>{enquiry.endDate ? format(new Date(enquiry.endDate), "MMM d, yyyy") : "-"}</TableCell>
               <TableCell className="text-muted-foreground max-w-xs truncate">{enquiry.notes || "-"}</TableCell>
               <TableCell className="text-right">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setLocation(`/enquiries/${enquiry.id}`)}
-                  className="hover-elevate shadow-sm bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 font-semibold"
-                >
-                  View Details
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setLocation(`/enquiries/${enquiry.id}`)}
+                    className="hover-elevate shadow-sm bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 font-semibold"
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeleteTarget({ id: enquiry.id, name: enquiry.name })}
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Delete enquiry from ${enquiry.name}`}
+                    title="Delete enquiry"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -218,6 +256,34 @@ export default function Enquiries() {
           ) : renderTable()
         )}
       </div>
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => {
+        if (!open && !deleteEnquiry.isPending) setDeleteTarget(null);
+      }}>
+        <AlertDialogContent className="w-[calc(100%-2rem)] max-w-lg rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this enquiry?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The enquiry from <strong className="text-foreground">{deleteTarget?.name}</strong> will be permanently removed from the list and calendar. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteEnquiry.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteEnquiry.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(event) => {
+                event.preventDefault();
+                if (!deleteTarget) return;
+                deleteEnquiry.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+              }}
+            >
+              {deleteEnquiry.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteEnquiry.isPending ? "Deleting…" : "Delete enquiry"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
