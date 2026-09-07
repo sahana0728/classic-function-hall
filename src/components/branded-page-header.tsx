@@ -41,16 +41,10 @@ export function BrandedPageHeader({
             </Button>
           )}
 
-          <div className="relative shrink-0">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-amber-300/60 via-amber-500/35 to-primary/25 blur-[2px]" />
-            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-amber-500/50 bg-[#101319] p-1.5 shadow-[0_8px_22px_rgba(180,120,25,0.20)] md:h-16 md:w-16">
-              <img
-                src="/favicon.png?v=1.0.4"
-                alt="Classic Function Hall logo"
-                className="h-full w-full rounded-xl object-cover"
-              />
-            </div>
-          </div>
+          <div
+            aria-hidden="true"
+            className="h-11 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700 shadow-[0_0_14px_rgba(217,159,55,0.35)] md:h-12"
+          />
 
           <div className="min-w-0">
             <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300 md:text-xs">
