@@ -495,6 +495,35 @@ router.post('/bookings/:id/payments', authenticate, async (req, res) => {
     }
 });
 
+// Add or edit the booking total independently from payment installments
+router.patch('/bookings/:id/totalAmount', authenticate, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const normalizedTotal = optionalAmount(req.body.totalAmount);
+
+        if (normalizedTotal === null || Number.isNaN(normalizedTotal) || normalizedTotal < 0) {
+            return res.status(400).json({ error: 'Total amount must be a valid non-negative number.' });
+        }
+
+        const { rows } = await db.query('SELECT "advancePaid" FROM bookings WHERE id = $1', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        const amountPaid = Number(rows[0].advancePaid || 0);
+        if (normalizedTotal < amountPaid) {
+            return res.status(400).json({ error: `Total amount cannot be less than the already paid amount of ₹${amountPaid.toLocaleString('en-IN')}` });
+        }
+
+        await db.query('UPDATE bookings SET "totalAmount" = $1 WHERE id = $2', [normalizedTotal, id]);
+        await createAuditLog('UPDATE_TOTAL_AMOUNT', id, 'booking', req.user.email, { totalAmount: normalizedTotal });
+
+        res.json({ message: 'Total amount updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Update general booking details
 router.put('/bookings/:id', authenticate, async (req, res) => {
     try {

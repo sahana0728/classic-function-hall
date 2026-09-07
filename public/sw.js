@@ -1,4 +1,4 @@
-const CACHE_NAME = 'classic-hall-v2';
+const CACHE_NAME = 'classic-hall-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

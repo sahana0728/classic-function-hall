@@ -44,6 +44,8 @@ export default function BookingDetails() {
   
   const [isEditingAdvance, setIsEditingAdvance] = useState(false);
   const [editedAdvance, setEditedAdvance] = useState("");
+  const [isEditingTotal, setIsEditingTotal] = useState(false);
+  const [editedTotal, setEditedTotal] = useState("");
   const [addThemeOpen, setAddThemeOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
 
@@ -165,6 +167,30 @@ export default function BookingDetails() {
     },
     onError: (err: Error) => {
       toast({ title: "Failed to add payment", description: err.message, variant: "destructive" });
+    }
+  });
+
+  const updateTotal = useMutation({
+    mutationFn: async (totalAmount: number) => {
+      const res = await fetchWithAuth(`/api/bookings/${bookingId}/totalAmount`, {
+        method: "PATCH",
+        body: JSON.stringify({ totalAmount }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update total amount");
+      }
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.bookings.get.path, bookingId] });
+      queryClient.invalidateQueries({ queryKey: ['auditLogs', 'booking', bookingId] });
+      toast({ title: totalAmount === null ? "Total amount added" : "Total amount updated" });
+      setIsEditingTotal(false);
+      setEditedTotal("");
+    },
+    onError: (err: Error) => {
+      toast({ title: "Failed to update total", description: err.message, variant: "destructive" });
     }
   });
 
@@ -314,11 +340,60 @@ export default function BookingDetails() {
             <DollarSign className="w-4 h-4" /> Payment Details
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-muted/40 rounded-xl p-3">
+            <div className="bg-muted/40 rounded-xl p-3 border border-border/50">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Total</p>
-              <p className="text-xl font-display font-bold text-primary">
+              <p className="text-xl font-display font-bold text-primary mb-3">
                 {totalAmount === null ? <span className="text-sm text-muted-foreground">Not recorded</span> : `₹${totalAmount.toLocaleString()}`}
               </p>
+              {!isEditingTotal ? (
+                <Button
+                  onClick={() => {
+                    setEditedTotal(totalAmount === null ? "" : totalAmount.toString());
+                    setIsEditingTotal(true);
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="w-full bg-background/60 h-8"
+                >
+                  {totalAmount === null ? <Plus className="w-3.5 h-3.5 mr-1" /> : <Pencil className="w-3.5 h-3.5 mr-1" />}
+                  {totalAmount === null ? "Add Total" : "Edit Total"}
+                </Button>
+              ) : (
+                <div className="flex flex-col gap-2 mt-2 bg-background rounded-md p-2 border border-border shadow-sm focus-within:ring-1 focus-within:ring-primary">
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1.5 text-sm text-primary font-bold z-10 pointer-events-none">₹</span>
+                    <Input
+                      autoFocus
+                      type="number"
+                      min={amountPaid}
+                      placeholder="Total amount"
+                      value={editedTotal}
+                      onChange={e => setEditedTotal(e.target.value)}
+                      className="h-8 pl-6 pr-2 py-1 text-sm font-semibold bg-transparent border rounded focus-visible:ring-0 shadow-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-full"
+                    />
+                  </div>
+                  {amountPaid > 0 && (
+                    <p className="text-[11px] leading-tight text-muted-foreground">Must be at least ₹{amountPaid.toLocaleString()} already paid.</p>
+                  )}
+                  <div className="flex gap-1 justify-end">
+                    <button
+                      onClick={() => updateTotal.mutate(Number(editedTotal))}
+                      disabled={updateTotal.isPending || editedTotal === "" || !Number.isFinite(Number(editedTotal)) || Number(editedTotal) < amountPaid}
+                      className="flex-1 h-7 flex items-center justify-center bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded shadow-sm text-xs font-semibold gap-1"
+                    >
+                      {updateTotal.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                      Save
+                    </button>
+                    <button
+                      onClick={() => { setIsEditingTotal(false); setEditedTotal(""); }}
+                      aria-label="Cancel editing total amount"
+                      className="w-7 h-7 flex flex-shrink-0 items-center justify-center bg-muted hover:bg-muted/80 text-muted-foreground rounded transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="bg-green-50 dark:bg-green-950/30 rounded-xl p-3 border border-green-200/50 group relative">
               <div className="flex justify-between items-center mb-1">

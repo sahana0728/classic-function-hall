@@ -4,7 +4,7 @@ import { CalendarView } from "@/components/calendar-view";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Calendar as CalendarIcon, Clock } from "lucide-react";
+import { Plus, Calendar as CalendarIcon, Clock, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Home() {
@@ -29,6 +29,11 @@ export default function Home() {
     } else {
       setLocation(`/booking/create`);
     }
+  };
+
+  const handleEventClick = (event: { id: string; type: "booked" | "enquiry" }) => {
+    setIsModalOpen(false);
+    setLocation(event.type === "booked" ? `/bookings/${event.id}` : `/enquiries/${event.id}`);
   };
 
   if (isLoading) {
@@ -72,10 +77,16 @@ export default function Home() {
             ) : (
               <div className="space-y-3">
                 {dayEvents.map(evt => (
-                  <div key={evt.id} className={`p-4 rounded-xl border flex gap-4 ${evt.type === 'booked' ? 'bg-destructive/5 border-destructive/20' : 'bg-yellow-50 border-yellow-200'
-                    }`}>
+                  <button
+                    key={`${evt.type}-${evt.id}`}
+                    type="button"
+                    onClick={() => handleEventClick(evt)}
+                    aria-label={`Open ${evt.type} details for ${evt.title}`}
+                    className={`group w-full p-4 rounded-xl border flex gap-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${evt.type === 'booked' ? 'bg-destructive/5 border-destructive/20 hover:border-destructive/40' : 'bg-yellow-50 border-yellow-200 hover:border-yellow-400'
+                      }`}
+                  >
                     <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${evt.type === 'booked' ? 'bg-destructive' : 'bg-yellow-500'}`} />
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h4 className="font-bold text-foreground">{evt.title}</h4>
                       <p className="text-sm flex items-center gap-1.5 mt-1 text-muted-foreground">
                         <Clock className="w-3.5 h-3.5" />
@@ -86,7 +97,8 @@ export default function Home() {
                         {evt.type}
                       </span>
                     </div>
-                  </div>
+                    <ChevronRight className="h-5 w-5 self-center flex-shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
+                  </button>
                 ))}
               </div>
             )}
