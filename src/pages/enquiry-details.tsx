@@ -172,7 +172,7 @@ export default function EnquiryDetails() {
             </p>
           </div>
 
-          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-xs text-yellow-800 flex items-start gap-2">
+          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-xs text-yellow-800 dark:text-yellow-200 flex items-start gap-2">
             <CheckCircle2 className="w-4 h-4 mt-0.5 text-yellow-600" />
             <p>
               <strong>Availability Note:</strong> If converted, hall will be explicitly available from{' '}
@@ -216,7 +216,7 @@ export default function EnquiryDetails() {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleConvert} className="space-y-5">
-               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3.5">
+               <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-3.5">
                   <p className="text-xs text-yellow-800 leading-snug">
                      Converting the enquiry for <strong>{enquiry.name}</strong> from <strong>{enquiry.startDate ? format(new Date(enquiry.startDate), "MMM d") : "TBD"} - {enquiry.endDate ? format(new Date(enquiry.endDate), "MMM d") : "TBD"}</strong>.<br/> Make sure there are no date conflicts.
                   </p>

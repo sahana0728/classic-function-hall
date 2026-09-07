@@ -18,6 +18,7 @@ import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { bookingMatchesDateRange } from "@/lib/booking-filters";
 
 export function isBookingClosed(booking: any) {
   if (!booking.endDate) return false;
@@ -35,14 +36,18 @@ export default function Bookings() {
   const { data: bookings = [], isLoading } = useBookings();
   const deleteBooking = useDeleteBooking();
   const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [activeTab, setActiveTab] = useState("active");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const isMobile = useIsMobile();
 
-  const filteredBookings = bookings.filter(b => 
-    b.customerName?.toLowerCase().includes(search.toLowerCase()) || 
-    (b.themeName && b.themeName.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredBookings = bookings.filter(b => {
+    const matchesSearch = b.customerName?.toLowerCase().includes(search.toLowerCase()) ||
+      (b.themeName && b.themeName.toLowerCase().includes(search.toLowerCase()));
+
+    return matchesSearch && bookingMatchesDateRange(b, fromDate, toDate);
+  });
 
   const displayedBookings = filteredBookings.filter(b => 
     activeTab === "closed" ? isBookingClosed(b) : !isBookingClosed(b)
@@ -179,15 +184,49 @@ export default function Bookings() {
 
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
         <Tabs defaultValue="active" onValueChange={setActiveTab} className="w-full">
-          <div className="p-3 md:p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row gap-3 md:gap-4 items-start sm:items-center justify-between">
+          <div className="p-3 md:p-4 border-b border-border bg-muted/20 grid grid-cols-1 lg:grid-cols-[minmax(240px,1fr)_auto_300px] gap-3 md:gap-4 items-center">
             <div className="relative flex-1 w-full max-w-sm">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input 
                 placeholder="Search by customer or theme..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-white h-11"
+                className="pl-9 bg-background h-11"
               />
+            </div>
+            <div className="flex gap-2 items-center w-full lg:w-auto">
+              <div className="relative flex-1 lg:w-[145px]">
+                <span className="text-[9px] text-muted-foreground absolute left-3 top-1 font-semibold uppercase pointer-events-none">From</span>
+                <Input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  aria-label="Filter bookings from date"
+                  className="pl-3 pr-2 pt-3 bg-background h-11 text-xs"
+                />
+              </div>
+              <div className="relative flex-1 lg:w-[145px]">
+                <span className="text-[9px] text-muted-foreground absolute left-3 top-1 font-semibold uppercase pointer-events-none">To</span>
+                <Input
+                  type="date"
+                  value={toDate}
+                  min={fromDate || undefined}
+                  onChange={(e) => setToDate(e.target.value)}
+                  aria-label="Filter bookings to date"
+                  className="pl-3 pr-2 pt-3 bg-background h-11 text-xs"
+                />
+              </div>
+              {(fromDate || toDate) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFromDate(""); setToDate(""); }}
+                  className="h-11 px-2 text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </Button>
+              )}
             </div>
             <TabsList className="grid w-full sm:w-[300px] grid-cols-2">
               <TabsTrigger value="active">Active</TabsTrigger>

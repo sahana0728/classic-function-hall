@@ -6,6 +6,15 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1e293b" />
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem("classic-hall-color-theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const useDark = savedTheme ? savedTheme === "dark" : prefersDark;
+        document.documentElement.classList.toggle("dark", useDark);
+        document.documentElement.style.colorScheme = useDark ? "dark" : "light";
+      })();
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Classic Hall" />

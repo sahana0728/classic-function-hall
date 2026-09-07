@@ -82,7 +82,7 @@ export default function Home() {
                     type="button"
                     onClick={() => handleEventClick(evt)}
                     aria-label={`Open ${evt.type} details for ${evt.title}`}
-                    className={`group w-full p-4 rounded-xl border flex gap-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${evt.type === 'booked' ? 'bg-destructive/5 border-destructive/20 hover:border-destructive/40' : 'bg-yellow-50 border-yellow-200 hover:border-yellow-400'
+                    className={`group w-full p-4 rounded-xl border flex gap-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${evt.type === 'booked' ? 'bg-destructive/5 border-destructive/20 hover:border-destructive/40' : 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 hover:border-yellow-400'
                       }`}
                   >
                     <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${evt.type === 'booked' ? 'bg-destructive' : 'bg-yellow-500'}`} />
@@ -92,7 +92,7 @@ export default function Home() {
                         <Clock className="w-3.5 h-3.5" />
                         {format(new Date(evt.startDate), "MMM d")} - {format(new Date(evt.endDate), "MMM d")}
                       </p>
-                      <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider ${evt.type === 'booked' ? 'bg-destructive/10 text-destructive' : 'bg-yellow-100 text-yellow-800'
+                      <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider ${evt.type === 'booked' ? 'bg-destructive/10 text-destructive' : 'bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-200'
                         }`}>
                         {evt.type}
                       </span>

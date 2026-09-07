@@ -69,6 +69,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6, .font-display {
@@ -79,7 +80,7 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl shadow-black/5;
+    @apply bg-white/70 dark:bg-slate-950/70 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-black/30;
   }
   
   .glass-panel-dark {

@@ -139,7 +139,7 @@ export default function Enquiries() {
   const renderTable = () => (
     <div className="overflow-x-auto">
       <Table>
-        <TableHeader className="bg-yellow-50/50">
+        <TableHeader className="bg-yellow-50/50 dark:bg-yellow-950/30">
           <TableRow>
             <TableHead className="font-semibold text-foreground">Name</TableHead>
             <TableHead className="font-semibold text-foreground">Phone</TableHead>
@@ -151,7 +151,7 @@ export default function Enquiries() {
         </TableHeader>
         <TableBody>
           {filteredEnquiries.map((enquiry: any) => (
-            <TableRow key={enquiry.id} className="hover:bg-yellow-50/30 transition-colors border-l-4 border-l-yellow-400">
+            <TableRow key={enquiry.id} className="hover:bg-yellow-50/30 dark:hover:bg-yellow-950/20 transition-colors border-l-4 border-l-yellow-400">
               <TableCell className="font-medium">{enquiry.name}</TableCell>
               <TableCell className="text-muted-foreground">{enquiry.phone}</TableCell>
               <TableCell>{enquiry.startDate ? format(new Date(enquiry.startDate), "MMM d, yyyy") : "-"}</TableCell>
@@ -163,7 +163,7 @@ export default function Enquiries() {
                     variant="secondary"
                     size="sm"
                     onClick={() => setLocation(`/enquiries/${enquiry.id}`)}
-                    className="hover-elevate shadow-sm bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 font-semibold"
+                    className="hover-elevate shadow-sm bg-yellow-50 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-950/70 font-semibold"
                   >
                     View Details
                   </Button>
@@ -212,7 +212,7 @@ export default function Enquiries() {
             placeholder="Search by name, phone or notes..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-white h-11 rounded-xl"
+            className="pl-9 bg-background h-11 rounded-xl"
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full sm:w-auto">
@@ -222,7 +222,7 @@ export default function Enquiries() {
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="pl-3 pr-3 pt-3 bg-white h-11 rounded-xl text-xs"
+              className="pl-3 pr-3 pt-3 bg-background h-11 rounded-xl text-xs"
             />
           </div>
           <div className="relative flex-1 sm:w-[150px]">
@@ -231,7 +231,7 @@ export default function Enquiries() {
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="pl-3 pr-3 pt-3 bg-white h-11 rounded-xl text-xs"
+              className="pl-3 pr-3 pt-3 bg-background h-11 rounded-xl text-xs"
             />
           </div>
           {(fromDate || toDate) && (

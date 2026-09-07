@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithAuth } from "@/lib/api";
-import { LogOut, CalendarDays, Bookmark, Palette, Smartphone, X, MessageSquare, MoreHorizontal, Shield, Download, Bell, ChevronRight, Calendar } from "lucide-react";
+import { useColorTheme } from "@/hooks/use-color-theme";
+import { LogOut, CalendarDays, Bookmark, Palette, Smartphone, X, MessageSquare, MoreHorizontal, Shield, Download, Bell, ChevronRight, Calendar, Moon, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 
@@ -12,6 +13,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const isMobile = useIsMobile();
+  const { theme, toggleTheme } = useColorTheme();
 
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
@@ -117,7 +119,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <header className="safe-top bg-card border-b border-border px-4 py-3 flex items-center justify-between z-30 shadow-sm">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
-              <img src="/favicon.png?v=1.0.3" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
+              <img src="/favicon.png?v=1.0.4" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
             <div>
               <h1 className="font-display font-bold text-base leading-none text-primary">Classic</h1>
@@ -125,6 +127,15 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-10 h-10 rounded-full hover:bg-muted active:bg-muted/80 flex items-center justify-center touch-target"
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              title={theme === "dark" ? "Light theme" : "Dark theme"}
+            >
+              {theme === "dark" ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-foreground/80" />}
+            </button>
             <button 
               onClick={() => setShowNotifications(true)}
               className="w-10 h-10 rounded-full hover:bg-muted active:bg-muted/80 flex items-center justify-center relative touch-target"
@@ -242,6 +253,15 @@ export function Layout({ children }: { children: ReactNode }) {
                     </button>
                   )}
 
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-foreground hover:bg-muted/50 active:bg-muted touch-target transition-colors"
+                  >
+                    {theme === "dark" ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-primary" />}
+                    <span className="font-medium">{theme === "dark" ? "Light Theme" : "Dark Theme"}</span>
+                  </button>
+
                   {/* Sign Out */}
                   <button
                     onClick={() => { setShowMoreMenu(false); logout(); }}
@@ -250,7 +270,7 @@ export function Layout({ children }: { children: ReactNode }) {
                     <LogOut className="w-5 h-5" />
                     <span className="font-medium">Sign Out</span>
                   </button>
-                  <p className="text-[10px] text-muted-foreground/60 text-center pt-2 font-mono">v1.0.3</p>
+                  <p className="text-[10px] text-muted-foreground/60 text-center pt-2 font-mono">v1.0.4</p>
                 </div>
               </motion.div>
             </>
@@ -358,7 +378,7 @@ export function Layout({ children }: { children: ReactNode }) {
                               onClick={() => setShowNotifications(false)}
                               className={`w-full text-left p-3.5 rounded-xl border transition-all flex justify-between items-start touch-target
                                 ${isNew 
-                                  ? 'bg-yellow-50/50 border-yellow-200 hover:bg-yellow-50' 
+                                  ? 'bg-yellow-50/50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-50 dark:hover:bg-yellow-950/50'
                                   : 'bg-card border-border hover:bg-muted/50'
                                 }
                               `}
@@ -414,7 +434,7 @@ export function Layout({ children }: { children: ReactNode }) {
       >
         <div className="p-6 border-b border-border/50 flex items-center gap-3 text-primary">
           <div className="w-10 h-10 rounded-xl overflow-hidden bg-transparent flex items-center justify-center flex-shrink-0">
-            <img src="/favicon.png?v=1.0.3" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
+            <img src="/favicon.png?v=1.0.4" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
           </div>
           <div>
             <h1 className="font-display font-bold text-xl leading-none">Classic</h1>
@@ -454,6 +474,15 @@ export function Layout({ children }: { children: ReactNode }) {
             </button>
           )}
 
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted rounded-xl transition-colors"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-primary" />}
+            {theme === "dark" ? "Light Theme" : "Dark Theme"}
+          </button>
+
           <div className="flex items-center gap-3 px-4 py-2">
             <div className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold font-display shadow-inner">
               {user.name.charAt(0)}
@@ -470,7 +499,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
-          <p className="text-[10px] text-muted-foreground/60 text-center pt-1 font-mono">v1.0.3</p>
+          <p className="text-[10px] text-muted-foreground/60 text-center pt-1 font-mono">v1.0.4</p>
         </div>
       </motion.aside>
 
