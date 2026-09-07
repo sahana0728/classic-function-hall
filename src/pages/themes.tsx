@@ -126,7 +126,8 @@ function ThemeForm({ initialData, onSubmit, isPending, submitLabel }: {
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                  className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-7 h-7 rounded-full bg-black/70 hover:bg-destructive text-white flex items-center justify-center shadow-sm"
+                  aria-label={`Remove ${p.file.name}`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -189,7 +190,7 @@ export default function Themes() {
                 key={theme.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all cursor-pointer"
+                className="group relative flex flex-col rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all cursor-pointer"
                 onClick={() => setGalleryTheme(theme)}
               >
                 <div className="h-52 overflow-hidden bg-muted relative">
@@ -212,27 +213,33 @@ export default function Themes() {
                       <Images className="w-3 h-3" /> {mediaCount} {mediaCount === 1 ? 'file' : 'files'}
                     </span>
                   )}
-                  {/* Edit & Delete buttons */}
-                  <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={e => { e.stopPropagation(); setEditTheme(theme); }}
-                      className="w-9 h-9 rounded-full bg-black/50 hover:bg-primary text-white flex items-center justify-center"
-                      title="Edit theme"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); setDeleteConfirm(theme.id); }}
-                      className="w-9 h-9 rounded-full bg-black/50 hover:bg-destructive text-white flex items-center justify-center"
-                      title="Delete theme"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
                 </div>
-                <div className="p-5">
+                <div className="p-5 flex flex-1 flex-col">
                   <h3 className="font-bold text-foreground text-lg">{theme.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1.5 line-clamp-2">{theme.description}</p>
+                  <div className="grid grid-cols-2 gap-2.5 mt-auto pt-4 border-t border-border/60">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={e => { e.stopPropagation(); setEditTheme(theme); }}
+                      className="h-10 rounded-xl font-semibold shadow-sm"
+                      aria-label={`Edit ${theme.name}`}
+                    >
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={e => { e.stopPropagation(); setDeleteConfirm(theme.id); }}
+                      className="h-10 rounded-xl font-semibold shadow-sm"
+                      aria-label={`Delete ${theme.name}`}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             );
@@ -288,6 +295,7 @@ export default function Themes() {
                               />
                             )}
                             <button
+                              type="button"
                               onClick={() => {
                                 deleteMedia.mutate({ themeId: editTheme.id, mediaId: m.id });
                                 setEditTheme((prev: any) => ({
@@ -295,7 +303,8 @@ export default function Themes() {
                                   media: prev.media.filter((item: any) => item.id !== m.id)
                                 }));
                               }}
-                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute top-1 right-1 w-7 h-7 rounded-full bg-destructive text-white flex items-center justify-center shadow-sm"
+                              aria-label="Delete media"
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
