@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays } from "date-fns";
-import { ArrowLeft, Loader2, Calendar, Phone, CheckCircle2, ArrowRightLeft, MessageSquare, History } from "lucide-react";
+import { Loader2, Calendar, Phone, CheckCircle2, ArrowRightLeft, History } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { AuditLogTimeline } from "@/components/audit-log-timeline";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export default function EnquiryDetails() {
   const [, setLocation] = useLocation();
@@ -112,30 +113,20 @@ export default function EnquiryDetails() {
 
   return (
     <div className="space-y-6 pb-12 max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/enquiries")} className="hover-elevate">
-            <ArrowLeft className="w-5 h-5" />
+      <BrandedPageHeader
+        section="Enquiry Details"
+        description={enquiry.name}
+        onBack={() => setLocation("/enquiries")}
+        action={(
+          <Button
+            onClick={() => setConvertOpen(true)}
+            className="shadow-sm bg-yellow-600 hover:bg-yellow-700 text-white hover-elevate"
+          >
+            <ArrowRightLeft className="w-4 h-4 mr-2" />
+            Convert to Booking
           </Button>
-          <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-yellow-100/50 flex items-center justify-center text-yellow-600 flex-shrink-0">
-               <MessageSquare className="w-5 h-5" />
-             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">Enquiry Details</h1>
-              <p className="text-muted-foreground text-sm mt-0.5">{enquiry.name}</p>
-            </div>
-          </div>
-        </div>
-        
-        <Button 
-           onClick={() => setConvertOpen(true)} 
-           className="shadow-sm bg-yellow-600 hover:bg-yellow-700 text-white hover-elevate w-full sm:w-auto"
-        >
-           <ArrowRightLeft className="w-4 h-4 mr-2" />
-           Convert to Booking
-        </Button>
-      </div>
+        )}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Customer Information Card */}

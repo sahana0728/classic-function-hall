@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, CheckCircle2, Loader2, MessageSquare, CalendarCheck } from "lucide-react";
+import { CheckCircle2, Loader2, MessageSquare, CalendarCheck } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export default function BookingCreate() {
   const [location, setLocation] = useLocation();
@@ -130,19 +131,11 @@ export default function BookingCreate() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => setLocation(isEnquiryMode ? "/enquiries" : "/home")} className="rounded-full">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            {isEnquiryMode ? "New Enquiry" : "Create Reservation"}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {isEnquiryMode ? "Record a customer enquiry for follow-up" : "Book the hall for a new event"}
-          </p>
-        </div>
-      </div>
+      <BrandedPageHeader
+        section={isEnquiryMode ? "New Enquiry" : "Create Reservation"}
+        description={isEnquiryMode ? "Record a customer enquiry for follow-up" : "Book the hall for a new event"}
+        onBack={() => setLocation(isEnquiryMode ? "/enquiries" : "/home")}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

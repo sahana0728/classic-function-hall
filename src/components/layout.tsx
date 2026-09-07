@@ -122,7 +122,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <img src="/favicon.png?v=1.0.4" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-base leading-none text-primary">Classic</h1>
+              <p className="font-display font-bold text-base leading-none text-primary">Classic</p>
               <p className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] mt-0.5">Function Hall</p>
             </div>
           </div>
@@ -437,7 +437,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <img src="/favicon.png?v=1.0.4" className="w-full h-full object-cover" alt="Classic Function Hall Logo" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-xl leading-none">Classic</h1>
+            <p className="font-display font-bold text-xl leading-none">Classic</p>
             <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Function Hall</p>
           </div>
         </div>

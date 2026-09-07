@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Calendar as CalendarIcon, Clock, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -42,16 +43,16 @@ export default function Home() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage hall availability and upcoming events</p>
-        </div>
-        <Button onClick={() => setLocation("/booking/create")} className="shadow-md shadow-primary/20 hover-elevate w-full sm:w-auto touch-target">
-          <Plus className="w-4 h-4 mr-2" />
-          New Booking
-        </Button>
-      </div>
+      <BrandedPageHeader
+        section="Dashboard"
+        description="Manage hall availability and upcoming events"
+        action={(
+          <Button onClick={() => setLocation("/booking/create")} className="shadow-md shadow-primary/20 hover-elevate touch-target">
+            <Plus className="w-4 h-4 mr-2" />
+            New Booking
+          </Button>
+        )}
+      />
 
       <div>
         <CalendarView events={events} onDateClick={handleDateClick} />

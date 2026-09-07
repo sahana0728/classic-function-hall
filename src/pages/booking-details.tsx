@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { isBookingClosed } from "./bookings";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 const BACKEND = BASE_URL;
 const VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov'];
@@ -258,15 +259,11 @@ export default function BookingDetails() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => setLocation("/bookings")} className="hover-elevate">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">Booking Details</h1>
-          <p className="text-muted-foreground mt-1">{booking.customerName}</p>
-        </div>
-      </div>
+      <BrandedPageHeader
+        section="Booking Details"
+        description={booking.customerName}
+        onBack={() => setLocation("/bookings")}
+      />
 
       {/* Customer + Event Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

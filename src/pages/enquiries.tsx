@@ -3,7 +3,7 @@ import { api } from "@shared/routes";
 import { fetchWithAuth, parseWithLogging } from "@/lib/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Loader2, MessageSquare, Plus, ChevronRight, Calendar, Phone, Search, Trash2 } from "lucide-react";
+import { Loader2, Plus, ChevronRight, Calendar, Phone, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export default function Enquiries() {
   const [, setLocation] = useLocation();
@@ -188,21 +189,16 @@ export default function Enquiries() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
-        <div className="flex items-end gap-3">
-          <div className="bg-gradient-to-br from-yellow-400/20 to-amber-500/20 p-3 md:p-4 rounded-2xl">
-            <MessageSquare className="w-6 h-6 md:w-8 md:h-8 text-yellow-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Enquiries</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Customer enquiries and follow-ups</p>
-          </div>
-        </div>
-        <Button onClick={() => setLocation("/booking/create?type=enquiry")} className="shadow-md shadow-yellow-600/20 hover-elevate bg-yellow-600 hover:bg-yellow-700 text-white w-full sm:w-auto touch-target">
-          <Plus className="w-4 h-4 mr-2" />
-          New Enquiry
-        </Button>
-      </div>
+      <BrandedPageHeader
+        section="Enquiries"
+        description="Customer enquiries and follow-ups"
+        action={(
+          <Button onClick={() => setLocation("/booking/create?type=enquiry")} className="shadow-md shadow-yellow-600/20 hover-elevate bg-yellow-600 hover:bg-yellow-700 text-white touch-target">
+            <Plus className="w-4 h-4 mr-2" />
+            New Enquiry
+          </Button>
+        )}
+      />
 
       {/* Filter Bar */}
       <div className="bg-card rounded-2xl border border-border shadow-sm p-4 bg-muted/20 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">

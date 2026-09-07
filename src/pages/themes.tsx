@@ -9,6 +9,7 @@ import { Plus, Image as ImageIcon, Loader2, Upload, X, Film, FileImage, Pencil, 
 import { motion, AnimatePresence } from "framer-motion";
 
 import { BASE_URL } from "@/lib/api";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 const VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov'];
 const BACKEND_URL = BASE_URL;
@@ -164,15 +165,15 @@ export default function Themes() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Decoration Themes</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage and view available decoration themes</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} className="rounded-xl shadow-md w-full sm:w-auto touch-target">
-          <Plus className="w-4 h-4 mr-2" /> Add Theme
-        </Button>
-      </div>
+      <BrandedPageHeader
+        section="Decoration Themes"
+        description="Manage and view available decoration themes"
+        action={(
+          <Button onClick={() => setCreateOpen(true)} className="rounded-xl shadow-md touch-target">
+            <Plus className="w-4 h-4 mr-2" /> Add Theme
+          </Button>
+        )}
+      />
 
       {isLoading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>

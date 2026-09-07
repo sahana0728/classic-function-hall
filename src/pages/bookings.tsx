@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { bookingMatchesDateRange } from "@/lib/booking-filters";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export function isBookingClosed(booking: any) {
   if (!booking.endDate) return false;
@@ -171,16 +172,16 @@ export default function Bookings() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Bookings</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage all customer reservations</p>
-        </div>
-        <Button onClick={() => setLocation("/booking/create")} className="shadow-md shadow-primary/20 hover-elevate w-full sm:w-auto touch-target">
-          <Plus className="w-4 h-4 mr-2" />
-          New Booking
-        </Button>
-      </div>
+      <BrandedPageHeader
+        section="Bookings"
+        description="Manage all customer reservations"
+        action={(
+          <Button onClick={() => setLocation("/booking/create")} className="shadow-md shadow-primary/20 hover-elevate touch-target">
+            <Plus className="w-4 h-4 mr-2" />
+            New Booking
+          </Button>
+        )}
+      />
 
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
         <Tabs defaultValue="active" onValueChange={setActiveTab} className="w-full">

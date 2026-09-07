@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BrandedPageHeader } from "@/components/branded-page-header";
 
 export default function Admin() {
   const queryClient = useQueryClient();
@@ -169,21 +170,16 @@ export default function Admin() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3">
-        <div className="flex items-end gap-3">
-          <div className="bg-gradient-to-br from-primary/20 to-secondary/20 p-3 md:p-4 rounded-2xl">
-            <Users className="w-6 h-6 md:w-8 md:h-8 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Admin Panel</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Manage system users and permissions</p>
-          </div>
-        </div>
-        <Button onClick={() => { setMode('add'); setForm({ name: "", email: "", password: "", role: "Staff" }); setIsAddOpen(true); }} className="shadow-md shadow-primary/20 hover-elevate w-full sm:w-auto touch-target">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add User
-        </Button>
-      </div>
+      <BrandedPageHeader
+        section="Admin Panel"
+        description="Manage system users and permissions"
+        action={(
+          <Button onClick={() => { setMode('add'); setForm({ name: "", email: "", password: "", role: "Staff" }); setIsAddOpen(true); }} className="shadow-md shadow-primary/20 hover-elevate touch-target">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add User
+          </Button>
+        )}
+      />
 
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
         {isLoading ? (
